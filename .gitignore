@@ -8,3 +8,4 @@ dist/
 *.sqlite
 .vscode/
 requirements_prod.txt
+raw_data/

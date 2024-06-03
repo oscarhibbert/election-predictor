@@ -1,5 +1,5 @@
 # Set the Docker OS version
-FROM tensorflow/tensorflow:2.10.0
+#TODO Add FROM to set base image
 
 # Set working directory
 WORKDIR /prod
