@@ -1,0 +1,8 @@
+.env
+.DS_Store
+.ipynb_checkpoints
+build/
+dist/
+*.egg-info
+*.csv
+*.sqlite
