@@ -6,3 +6,5 @@ dist/
 *.egg-info
 *.csv
 *.sqlite
+.vscode/
+requirements_prod.txt
