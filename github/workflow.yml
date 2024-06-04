@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ master, main ]
 
+#TODO ensure Slack integration is notifying on failure
 jobs:
   build-and-run-pytest:
 
@@ -34,3 +35,8 @@ jobs:
 # Fourth step: format code with Black
   - name: Format with Black
     run: black .
+    
+
+#TODO Add containerisation step to build Docker image
+
+#TODO Add deployment step to deploy to Cloud Run
