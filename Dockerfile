@@ -2,7 +2,7 @@
 #TODO Add FROM to set base image
 
 # Set working directory
-WORKDIR /prod
+WORKDIR /election-predictor
 
 # Set the image content
 COPY requirements_prod.txt requirements.txt
