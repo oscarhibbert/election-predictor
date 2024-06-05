@@ -9,3 +9,5 @@ dist/
 .vscode/
 requirements_prod.txt
 raw_data/
+processed_data/
+gcp_service_account_key.json
