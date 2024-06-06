@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import time
 
-def get_wikipedia_pageviews(start_date, end_date, articles):
+def get_wikipedia_pageviews(start_date='20150701', end_date=datetime.datetime.now().strftime('%Y%m%d'), articles=['Labour Party (UK)', 'Conservative Party (UK)']):
     """
     Fetches Wikipedia pageviews data for given articles between start_date and end_date.
 
@@ -59,3 +59,5 @@ if __name__ == "__main__":
 
     # Display the data
     print(df_pageviews.head())
+
+get_wikipedia_pageviews()
