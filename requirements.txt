@@ -31,3 +31,6 @@ psycopg2-binary
 fastapi
 pytz
 uvicorn
+
+# ML
+xgboost
