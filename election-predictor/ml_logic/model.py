@@ -136,6 +136,6 @@ class XGBoostModel(BaseModel):
             model, X, y, scoring="neg_root_mean_squared_error"
         ).mean()
 
-        print(f"✅ Model evaluated, MAE: {rmse_score}")
+        print(f"✅ Model evaluated, RMSE score: {rmse_score}")
 
         return rmse_score
