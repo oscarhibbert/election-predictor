@@ -3,7 +3,9 @@ from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import MinMaxScaler, OrdinalEncoder
 from sklearn.pipeline import make_pipeline
 
-def preprocessor(train_data, test_data) -> dict:
+import pandas as pd
+
+def preprocessor(train_data: pd.DataFrame, test_data: pd.DataFrame) -> dict:
     """
     Preprocesses train and test DataFrames.
 

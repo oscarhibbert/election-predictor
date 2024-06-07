@@ -8,7 +8,7 @@ from election_predictor.params import *
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 
 #TODO Create data cleaning functions for each data source
-def clean_national_polls(national_polls_dataframe) -> dict:
+def clean_national_polls(national_polls_dataframe: pd.DataFrame) -> dict:
     """
     Cleans the national polls Dataframe.
 
@@ -107,7 +107,7 @@ def clean_national_results(national_results_dataframe) -> dict:
 def clean_constituency_results():
     pass
 
-def clean_national_google_trends(google_trends_dataframe) -> pd.DataFrame:
+def clean_national_google_trends(google_trends_dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans Google Trends Dataframe.
 
@@ -144,7 +144,7 @@ def clean_national_google_trends(google_trends_dataframe) -> pd.DataFrame:
 
     return df
 
-def clean_national_wikipedia(wikipedia_dataframe) -> pd.DataFrame:
+def clean_national_wikipedia(wikipedia_dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans Wikipedia data.
 
@@ -176,7 +176,7 @@ def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
     return df
 
 # Create master fetch and clean function
-def fetch_clean_data(data_source) -> list:
+def fetch_clean_data(data_source: str | list) -> list:
     """
     Selects the specified data sources, cleans and returns them as DataFrames.
 
