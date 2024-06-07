@@ -153,9 +153,10 @@ def clean_national_wikipedia(wikipedia_dataframe) -> pd.DataFrame:
     """
     # Handle datatime formatting
     wikipedia_dataframe['date'] = wikipedia_dataframe.to_datetime(wikipedia_dataframe['date'], format='%Y%m%d')
-    
+
     return wikipedia_dataframe
 
+#TODO Create clean function for Reddit data once built by CK
 def clean_national_reddit():
     pass
 
