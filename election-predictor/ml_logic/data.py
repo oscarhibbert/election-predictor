@@ -107,8 +107,42 @@ def clean_national_results(national_results_dataframe) -> dict:
 def clean_constituency_results():
     pass
 
-def clean_national_google_trends():
-    pass
+def clean_national_google_trends(google_trends_dataframe):
+    """
+    Cleans Google Trends Dataframe.
+
+    :param good_trends_dataframe: The Google Trends DataFrame.
+    :return: A DataFrame containing the cleaned Google Trends data.
+    """
+    # Ensure DataFrame has only one Labour Party column and months are in datetime format
+
+    # Set DataFrame
+    df = google_trends_dataframe
+
+    # Handle <1 values
+    df.replace('<1', 0.5,inplace=True)
+
+    # Handle datatypes
+    df = df.astype(
+        {'Green Party: (United Kingdom)':'int','Reform UK: (United Kingdom)':'int',\
+        'Plaid Cymru: (United Kingdom)':'int','Scottish National Party: (United Kingdom)':'int',\
+            'UK Independence Party: (United Kingdom)':'int','British National Party: (United Kingdom)':'int'})
+
+    # Handle column naming conventions
+    df.rename(columns={
+        'Labour Party: (United Kingdom)': 'LAB_trends',
+        'Conservative Party: (United Kingdom)': 'CON_trends',
+        'Liberal Democrats: (United Kingdom)': 'LIB_trends',
+        'Green Party: (United Kingdom)': 'GRE_trends',
+        'Reform UK: (United Kingdom)': 'BRX_trends',
+        'Plaid Cymru: (United Kingdom)': 'PLC_trends',
+        'Scottish National Party: (United Kingdom)': 'SNP_trends',
+        'UK Independence Party: (United Kingdom)': 'UKI_trends',
+        'British National Party: (United Kingdom)': 'NAT_trends'},
+        inplace=True
+    )
+
+    return df
 
 def clean_national_wikipedia():
     pass
