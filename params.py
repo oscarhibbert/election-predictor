@@ -45,3 +45,64 @@ DATA_RETRIEVAL = {
         'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     }
 }
+
+##################  ELECTIONS  ##################
+UK_ELECTIONS = {
+    "2005": {
+        "date": "2005-05-05",
+    },
+    "2010": {
+        "date": "2010-05-06",
+    },
+    "2015": {
+        "date": "2015-05-07",
+    },
+    "2017": {
+        "date": "2017-06-08",
+    },
+    "2019": {
+        "date": "2019-12-12",
+    },
+    "2024": {
+        "date": "2024-07-04",
+    }
+}
+
+UK_ELECTION_COUNTRY_CODES = {
+    "scotland": "SCO",
+    "great_britain": "GBR",
+    "wales": "WAL",
+    "northern_ireland": "NIR",
+    "united_kingdom": "UKM",
+    "england_wales": "EAW"
+}
+
+##################  POLLSTERS  ##################
+POLLSTER_RATINGS = {
+    'Populus': 'D+',
+    'ICM': 'D+',
+    'IpsosMORI': 'A-',
+    'YouGov': 'A-',
+    'SavantaComRes': 'B+',
+    'BPIX': 'F',
+    'AngusReid': 'F',
+    'Harris': 'C-',
+    'TNSBMRB': 'D',
+    'Opinium': 'A-',
+    'Survation': 'A-',
+    'LordAshcroft': 'D-',
+    'Panelbase': 'A-',
+    'BMG': 'B',
+    'ORB': 'D+',
+    'Kantar': 'B+',
+    'Deltapoll': 'D+',
+    'NumberCruncherPolitics': 'D',
+    'Focaldata': 'D+',
+    'RedfieldWilton': 'D',
+    'JLPartners': 'D',
+    'FindOutNow': 'D',
+    'Omnisis': 'D',
+    'Techne': 'D',
+    'PeoplePolling': 'D',
+    'MoreinCommon': 'F'
+}
