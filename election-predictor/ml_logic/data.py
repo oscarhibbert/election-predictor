@@ -163,7 +163,7 @@ def clean_national_reddit():
 #TODO Get data should cache data locally to prevent repeated data loading
 def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
     """
-    Load data from Google BigQuery and return as a dataframe
+    Load data from Google BigQuery and return as a dataframe.
     """
     print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
     client = bigquery.Client(project=gcp_project)
