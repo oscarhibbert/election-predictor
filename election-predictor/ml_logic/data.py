@@ -1,17 +1,109 @@
 # Imports
 import pandas as pd
+from  datetime import datetime
 from google.cloud import bigquery
 from colorama import Fore, Style
 
 from election_predictor.params import *
+from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 
 #TODO Create data cleaning functions for each data source
-def clean_national_polls():
+def clean_national_polls(national_polls_dataframe) -> dict:
+    """
+    Cleans the national polls Dataframe.
+
+    :param national_polls_dataframe: The national polls Dataframe.
+    :return: A dictionary containing cleaned polling data in DataFrames for each country.
+    """
+    np_dataframe = national_polls_dataframe
+
+    # Handle spaces and ampersands in pollster names
+    np_dataframe['pollster'] = np_dataframe['pollster'].str.replace(' ', '').str.replace('&', '').str.replace('-', '')
+
+    # Creates unique index for each poll
+    df_uuid = np_dataframe.set_index(np_dataframe['enddate'].dt.strftime('%Y-%m-%d').apply(str).str.replace('-', '_') + '_' + np_dataframe['pollster'])
+
+    # Pivots table to create column for each party
+    df = df_uuid.pivot_table(values="votingintention", index=[df_uuid.index,\
+                                                                        'startdate', 'enddate', 'pollster', 'samplesize', 'countrycode'], columns=['partycode'])
+    df.reset_index(level=['startdate', 'enddate', 'pollster', 'samplesize', 'countrycode'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    # Filters to after January 1, 2004
+    df = df[df['enddate'] > '2004-01-01']
+
+    # Removes pollsters with fewer than 10 polls
+    pollster_counts = df['pollster'].value_counts()
+    valid_pollsters = pollster_counts[pollster_counts >= 10].index
+    df = df[df['pollster'].isin(valid_pollsters)]
+
+    # Adds rating column
+    df['pollster_rating'] = df['pollster'].map(POLLSTER_RATINGS)
+
+    # Set election dates
+    election_dates = [
+        datetime.strptime(UK_ELECTIONS["2005"]["date"], "%Y-%m-%d"),
+        datetime.strptime(UK_ELECTIONS["2010"]["date"], "%Y-%m-%d"),
+        datetime.strptime(UK_ELECTIONS["2015"]["date"], "%Y-%m-%d"),
+        datetime.strptime(UK_ELECTIONS["2017"]["date"], "%Y-%m-%d"),
+        datetime.strptime(UK_ELECTIONS["2019"]["date"], "%Y-%m-%d"),
+        datetime.strptime(UK_ELECTIONS["2024"]["date"], "%Y-%m-%d")
+    ]
+
+    # Creates next election date column
+    df['next_election_date'] = df['startdate'].apply(lambda x: find_next_election_date(x, election_dates))
+    df['days_until_next_election'] = (df['next_election_date'] - df['startdate']).dt.days
+
+    # Creates subsets of polls
+    gb_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["great_britain"])] # 4622 polls
+    sco_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["scotland"])] # 213 polls
+    wal_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["wales"])] #91 polls
+    ukm_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["united_kingdom"])] #428 polls
+
+    # Disregard polls:
+    nir_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["northern_ireland"])] # Inclined to disregard, only 1 polls
+    enw_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["england_wales"])] # Inclined to disregard, only 1 [poll]
+
+    # Defines relevant parties for each country
+    gb_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'NAT', 'OTH', 'PLC', 'SNP', 'UKI']
+    sco_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'OTH', 'SNP', 'OTH', 'UKI']
+    ukm_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'NAT', 'PLC', 'SNP', 'UKI']
+    wal_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'OTH', 'PLC', 'UKI']
+
+    # Filtered dataframe for GB polls with GB parties
+    gb_df = gb_polls[gb_columns]
+    # Filtered dataframe for Scotland polls with relevant parties
+    scotland_df = sco_polls[sco_columns]
+    # Filtered dataframe for Wales polls with relevant parties
+    wales_df = wal_polls[wal_columns]
+    # Filtered dataframe for UK polls with UK parties
+    uk_df = ukm_polls[ukm_columns]
+
+    # Return a DataFrame containing polls for each country
+    return {
+        "great_britain": {
+            "polls_dataframe": gb_df,
+            "election_code": "GBR"
+        },
+        "scotland": {
+            "polls_dataframe": scotland_df,
+            "election_code": "SCO"
+        },
+        "wales": {
+            "polls_dataframe": wales_df,
+            "election_code": "WAL"
+        },
+        "united_kingdom": {
+            "polls_dataframe": uk_df,
+            "election_code": "UKM"
+        }
+    }
+
+# Not built as no requirement for continued results cleaning
+def clean_national_results(national_results_dataframe) -> dict:
     pass
 
-def clean_national_results():
-    pass
-
+# Not built as no requirement for continued results cleaning
 def clean_constituency_results():
     pass
 
