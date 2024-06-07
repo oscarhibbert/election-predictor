@@ -107,7 +107,7 @@ def clean_national_results(national_results_dataframe) -> dict:
 def clean_constituency_results():
     pass
 
-def clean_national_google_trends(google_trends_dataframe):
+def clean_national_google_trends(google_trends_dataframe) -> pd.DataFrame:
     """
     Cleans Google Trends Dataframe.
 
@@ -144,8 +144,17 @@ def clean_national_google_trends(google_trends_dataframe):
 
     return df
 
-def clean_national_wikipedia():
-    pass
+def clean_national_wikipedia(wikipedia_dataframe) -> pd.DataFrame:
+    """
+    Cleans Wikipedia data.
+
+    :param wikipedia_dataframe: The Google Trends DataFrame.
+    :return: A DataFrame containing the cleaned Wikipedia data.
+    """
+    # Handle datatime formatting
+    wikipedia_dataframe['date'] = wikipedia_dataframe.to_datetime(wikipedia_dataframe['date'], format='%Y%m%d')
+    
+    return wikipedia_dataframe
 
 def clean_national_reddit():
     pass
