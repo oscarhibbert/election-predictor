@@ -106,3 +106,14 @@ POLLSTER_RATINGS = {
     'PeoplePolling': 'D',
     'MoreinCommon': 'F'
 }
+
+##################  MODEL DEFAULT PARAMETERS  ##################
+XGBOOST_PARAMS = {
+    "learning_rate": 0.3,
+    "n_estimators": 300,
+    "max_depth": 3,
+    "subsample": 0.7,
+    "objective":"reg:squarederror",
+    "nthread": -1,
+    "enable_categorical": True
+}
