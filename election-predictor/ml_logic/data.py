@@ -226,9 +226,8 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["national_polls"]["query"]
         )
 
-        national_polls_cleaned = clean_national_polls(national_polls)
-
-        data.append(national_polls_cleaned)
+        # national_polls source is cleaned and does not require cleaning logic
+        data.append(national_polls)
 
     if data_source == "national_results":
         national_results = get_data(
@@ -236,9 +235,8 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["national_results"]["query"]
         )
 
-        national_results_cleaned = clean_national_results(national_results)
-
-        data.append(national_results_cleaned)
+        # national_results is cleaned and does not require cleaning logic
+        data.append(national_results)
 
     if data_source == "constituency_results":
         constituency_results = get_data(
