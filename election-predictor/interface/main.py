@@ -153,3 +153,7 @@ def predict_election(election_year:int) -> dict:
         }
 
     #TODO Handle prediction (ensure input features are transform via preprocessor instance)
+    predictions = { }
+
+    for party_code, party in train_test_results:
+        pass
