@@ -1,11 +1,15 @@
 import numpy as np
 import pandas as pd
 from datetime import datetime
+
 # Import all functions inside data.py from ml_logic
 from ml_logic.data import fetch_clean_data
+
 # Import preprocessor
 from ml_logic.preprocessor import preprocessor
 
+# Import modelling functions from ml_logic
+from ml_logic.model import XGBoostModel
 
 def predict_election(election_year:int) -> dict:
     """
@@ -89,7 +93,31 @@ def predict_election(election_year:int) -> dict:
     processed_train_data, processed_test_data, \
     preprocessor_pipeline = preprocessor(train_data, test_data)
 
-    #TODO Handle modelling
+    # Set train and test feature DataFrames
+    X_train = processed_train_data.drop(columns=['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
+       'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
+       'OTH_PERCENTAGE','enddate_year_month','Month'])
+
+    X_test = processed_test_data.drop(columns=['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
+       'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
+       'OTH_PERCENTAGE','enddate_year_month','Month'])
+
+    # Set train and test target DataFrames
+    y_train = processed_train_data[['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT',
+                    'NAT_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_PERCENTAGE']]
+
+    y_test = processed_test_data[['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT',
+                    'NAT_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_PERCENTAGE']]
+
+
+
+    # Handle XGBoost modelling
+    # Handle model fetch and initialisation
+    xgb_regression_model = XGBoostModel()
+    xgb_regression_model.initialize_model()
+
+    # Handle model compiling
+    xgb_regression_model.compile_model() # Uses default model parameters from params.py
 
     #TODO Handle model evaluation
 
