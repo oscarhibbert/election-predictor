@@ -17,10 +17,16 @@ def predict_election(election_year:int) -> dict:
     # Determine the last election cycle
 
 
-    #TODO Handle data source fetching and cleaning
+    #Handle data source fetching and cleaning
     data_sources = list(DATA_RETRIEVAL.keys())
 
-    fetch_clean_data(data_sources)
+    clean_data_sources = fetch_clean_data(data_sources)
+
+    national_polls, national_results, constituency_results, \
+    national_google_trends, national_wikipedia, national_reddit, \
+    ons_economic_data = clean_data_sources
+
+    #TODO Handle data source merging
 
 
     #TODO Handle preprocessing
