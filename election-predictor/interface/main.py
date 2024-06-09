@@ -93,32 +93,64 @@ def predict_election(election_year:int) -> dict:
     processed_train_data, processed_test_data, \
     preprocessor_pipeline = preprocessor(train_data, test_data)
 
-    # Set train and test feature DataFrames
-    X_train = processed_train_data.drop(columns=['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
+
+    # Handle feature data
+    selected_features = ['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
        'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
-       'OTH_PERCENTAGE','enddate_year_month','Month'])
+       'OTH_PERCENTAGE','enddate_year_month','Month']
 
-    X_test = processed_test_data.drop(columns=['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
-       'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
-       'OTH_PERCENTAGE','enddate_year_month','Month'])
+    X_train = processed_train_data.drop(columns=selected_features)
+    X_train = preprocessor_pipeline.fit_transform(X_train)
 
-    # Set train and test target DataFrames
-    y_train = processed_train_data[['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT',
-                    'NAT_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_PERCENTAGE']]
+    X_test = processed_test_data.drop(columns=selected_features)
+    X_test = preprocessor_pipeline.transform(X_test)
 
-    y_test = processed_test_data[['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT',
-                    'NAT_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_PERCENTAGE']]
+    # Handle matrix converstion for train and test feature data
+    X_train = np.array(X_train)
+    X_test = np.array(X_test)
+
+    # Handle target data
+    selected_targets = ['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT',
+                'NAT_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_PERCENTAGE']
+
+    y_train = processed_train_data[selected_targets]
+
+    y_test = processed_test_data[selected_targets]
 
 
+    # Handle training and testing UK GE parties vote share
+    parties = [
+        'LAB', 'CON', 'LIB', 'GRE', 'BRX', 'NAT', 'SNP', 'UKI', 'PLC',
+        'OTH'
+    ]
 
-    # Handle XGBoost modelling
-    # Handle model fetch and initialisation
-    xgb_regression_model = XGBoostModel()
-    xgb_regression_model.initialize_model()
+    train_test_results = { }
 
-    # Handle model compiling
-    xgb_regression_model.compile_model() # Uses default model parameters from params.py
+    for party_code, party in parties:
+        # Set party target train and test
+        party_y_train = y_train[party_code]
+        party_y_test = y_test[party_code]
 
-    #TODO Handle model evaluation
+        # Handle XGBoost Regressor modelling
+        # Handle model fetch and initialisation
+        xgb_regressor = XGBoostModel()
+        xgb_regressor.initialize_model()
+
+        # Handle model compiling
+        xgb_regressor.compile_model() # Uses default model parameters from params.py
+
+        # Handle model training
+        trained_model = xgb_regressor.train_model(X_train, party_y_train)
+
+        # Handle model evaluation
+        rmse_score = xgb_regressor.evaluate_model(trained_model, X_test, party_y_test).mean()
+
+        train_test_results.append(
+            {
+                "party": party_code,
+                "rmse_score": rmse_score,
+                "trained_model": trained_model
+            }
+        )
 
     #TODO Handle prediction
