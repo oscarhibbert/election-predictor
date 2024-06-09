@@ -26,8 +26,8 @@ def predict_election(election_year:int) -> dict:
     national_google_trends, national_wikipedia, national_reddit, \
     ons_economic_data = clean_data_sources
 
-    #TODO Handle data source merging
-    #TODO Merge results on polls and some additional cleaning
+    # Handle data source merging
+    # Merge results on polls and some additional cleaning
     polls_results = national_polls.merge(national_results, on='election_year', how='left')
 
     polls_results.rename(
@@ -60,9 +60,18 @@ def predict_election(election_year:int) -> dict:
     polls_results.rename(columns={'days_until_next_election': 'days_to_elec'}, inplace=True)
     polls_results.drop(columns='Geography', inplace=True)
     polls_results.drop(columns='election_year', inplace=True)
-    
-    #TODO Merge trends on polls_results
-    #TODO Merge economic data on polls_results_trends
+
+    # Merge trends on polls_results
+    polls_results_trends = pd.merge(
+        polls_results, national_google_trends,how='left',
+        left_on='enddate_year_month',right_on='Month'
+    )
+
+    # Merge economic data on polls_results_trends
+    polls_results_trends_economic = pd.merge(
+        polls_results_trends,ons_economic_data,
+        how='left',left_on='enddate_year_month',right_on='Month'
+    )
 
     #TODO Train, test split data
 
