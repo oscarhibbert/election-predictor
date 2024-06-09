@@ -3,6 +3,8 @@ import pandas as pd
 from datetime import datetime
 # Import all functions inside data.py from ml_logic
 from ml_logic.data import fetch_clean_data
+# Import preprocessor
+from ml_logic.preprocessor import preprocessor
 
 
 def predict_election(election_year:int) -> dict:
@@ -73,7 +75,7 @@ def predict_election(election_year:int) -> dict:
         how='left',left_on='enddate_year_month',right_on='Month'
     )
 
-    #TODO Train, test split data
+    # Train, test split data
     polls_results_trends_economic['next_elec_date'] = polls_results_trends_economic['next_elec_date'].astype("datetime64[ns]")
     train_data = polls_results_trends_economic[
         polls_results_trends_economic['next_elec_date'] < datetime.strptime('2019-12-12', '%Y-%m-%d')
@@ -83,7 +85,9 @@ def predict_election(election_year:int) -> dict:
         polls_results_trends_economic['next_elec_date'] == datetime.strptime('2019-12-12', '%Y-%m-%d')
     ]
 
-    #TODO Handle preprocessing
+    # Handle preprocessing
+    processed_train_data, processed_test_data, \
+    preprocessor_pipeline = preprocessor(train_data, test_data)
 
     #TODO Handle modelling
 
