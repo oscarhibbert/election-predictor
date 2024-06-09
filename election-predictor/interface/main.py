@@ -89,15 +89,15 @@ def predict_election(election_year:int) -> dict:
         polls_results_trends_economic['next_elec_date'] == datetime.strptime('2019-12-12', '%Y-%m-%d')
     ]
 
-    # Handle preprocessing
-    processed_train_data, processed_test_data, \
-    preprocessor_pipeline = preprocessor(train_data, test_data)
 
-
-    # Handle feature data
+    # Handle feature selection
     selected_features = ['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
        'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
        'OTH_PERCENTAGE','enddate_year_month','Month']
+
+    # Handle preprocessing
+    processed_train_data, processed_test_data, \
+    preprocessor_pipeline = preprocessor(train_data, test_data)
 
     X_train = processed_train_data.drop(columns=selected_features)
     X_train = preprocessor_pipeline.fit_transform(X_train)
@@ -153,4 +153,4 @@ def predict_election(election_year:int) -> dict:
             }
         )
 
-    #TODO Handle prediction
+    #TODO Handle prediction (ensure input features are transform via preprocessor instance)
