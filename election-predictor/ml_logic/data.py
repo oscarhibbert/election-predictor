@@ -156,6 +156,15 @@ def clean_national_wikipedia(wikipedia_dataframe: pd.DataFrame) -> pd.DataFrame:
 
     return wikipedia_dataframe
 
+def clean_ons_economic_data(ons_economic_dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans ONS economic data.
+
+    :param ons_economic_dataframe: The ONS economic DataFrame.
+    :return: A DataFrame containing the cleaned ONS economic data.
+    """
+    pass
+
 #TODO Create clean function for Reddit data once built by CK
 def clean_national_reddit():
     pass
@@ -269,5 +278,15 @@ def fetch_clean_data(data_source: str | list) -> list:
         national_reddit_cleaned = clean_national_reddit(national_reddit)
 
         data.append(national_reddit_cleaned)
+
+    if data_source == "ons_economic_data":
+        ons_economic_data = get_data(
+            GCP_PROJECT_ID,
+            DATA_RETRIEVAL["ons_economic_data"]["query"]
+        )
+
+        ons_economic_data_cleaned = clean_ons_economic_data(ons_economic_data)
+
+        data.append(ons_economic_data_cleaned)
 
     return data
