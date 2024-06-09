@@ -16,8 +16,8 @@ DATA_SOURCES = ["national_polls", "national_results", "constituency_results",
                 "ons_economic_data"]
 DATA_RETRIEVAL = {
     "national_polls": {
-        "dataset": "master_source",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "national_polls",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
         "feature_selection": ["samplesize", "days_to_elec", "poll_length",
                               "rating", "BRX_FC", "CON_FC", "GRE_FC", "LAB_FC",
@@ -25,38 +25,38 @@ DATA_RETRIEVAL = {
                               "SNP_FC", "UKI_FC"]
     },
     "national_results": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "national_results",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     },
     "constituency_results": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "constinuency_results",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     },
     "national_google_trends": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "national_google_trends",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
         "feature_selection": ["LAB_trends", "CON_trends", "LIB_trends",
                               "GRE_trends", "BRX_trends", "PLC_trends",
                               "SNP_trends", "UKI_trends", "NAT_trends"]
     },
     "national_wikipedia": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "national_wikipedia",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
         "feature_selection": ""
     },
     "national_reddit": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "national_reddit",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
         "feature_selection": ""
     },
     "ons_economic_data": {
-        "dataset": "",
-        "table": "",
+        "dataset": "master_sources",
+        "table": "ons_economic_data",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
         "feature_selection": ["GDP", "Inflation", "Unemployment"]
     }
