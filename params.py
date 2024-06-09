@@ -1,54 +1,64 @@
 import os
 
 ##################  GOOGLE CLOUD PLATFORM  ##################
-GCP_PROJECT_ID = os.environ['GCP_PROJECT']
-GCP_SERVICE_ACCOUNT=os.environ['GCP_SERVICE_ACCOUNT']
-GCP_SERVICE_ACCOUNT_KEY = os.environ['GCP_SERVICE_ACCOUNT_KEY']
+GCP_PROJECT_ID = os.environ["GCP_PROJECT"]
+GCP_SERVICE_ACCOUNT=os.environ["GCP_SERVICE_ACCOUNT"]
+GCP_SERVICE_ACCOUNT_KEY = os.environ["GCP_SERVICE_ACCOUNT_KEY"]
 
 ##################  GCP BIG QUERY  ##################
-BQ_REGION=os.environ['BQ_REGION']
-BQ_SOURCE_DATASET = os.environ['BQ_SOURCE_DATASET']
-BQ_CLEANED_DATASET = os.environ['BQ_CLEANED_DATASET']
+BQ_REGION=os.environ["BQ_REGION"]
+BQ_SOURCE_DATASET = os.environ["BQ_SOURCE_DATASET"]
+BQ_CLEANED_DATASET = os.environ["BQ_CLEANED_DATASET"]
 
 ##################  DATA SOURCES  ##################
-DATA_SOURCES = ['national_polls', 'national_results', 'constituency_results',
-                'national_google_trends', 'national_wikipedia', 'national_reddit',
-                'ons_economic_data']
+DATA_SOURCES = ["national_polls", "national_results", "constituency_results",
+                "national_google_trends", "national_wikipedia", "national_reddit",
+                "ons_economic_data"]
 DATA_RETRIEVAL = {
-    'national_polls': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "national_polls": {
+        "dataset": "master_source",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "feature_selection": ["samplesize", "days_to_elec", "poll_length",
+                              "rating", "BRX_FC", "CON_FC", "GRE_FC", "LAB_FC",
+                              "LIB_FC", "NAT_FC", "OTH_FC", "PLC_FC",
+                              "SNP_FC", "UKI_FC"]
     },
-    'national_results': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "national_results": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     },
-    'constituency_results': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "constituency_results": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     },
-    'national_google_trends': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "national_google_trends": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "feature_selection": ["LAB_trends", "CON_trends", "LIB_trends",
+                              "GRE_trends", "BRX_trends", "PLC_trends",
+                              "SNP_trends", "UKI_trends", "NAT_trends"]
     },
-    'national_wikipedia': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "national_wikipedia": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "feature_selection": ""
     },
-    'national_reddit': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "national_reddit": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "feature_selection": ""
     },
-    'ons_economic_data': {
-        'dataset': '',
-        'table': '',
-        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    "ons_economic_data": {
+        "dataset": "",
+        "table": "",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "feature_selection": ["GDP", "Inflation", "Unemployment"]
     }
 }
 
@@ -85,32 +95,32 @@ UK_ELECTION_COUNTRY_CODES = {
 
 ##################  POLLSTERS  ##################
 POLLSTER_RATINGS = {
-    'Populus': 'D+',
-    'ICM': 'D+',
-    'IpsosMORI': 'A-',
-    'YouGov': 'A-',
-    'SavantaComRes': 'B+',
-    'BPIX': 'F',
-    'AngusReid': 'F',
-    'Harris': 'C-',
-    'TNSBMRB': 'D',
-    'Opinium': 'A-',
-    'Survation': 'A-',
-    'LordAshcroft': 'D-',
-    'Panelbase': 'A-',
-    'BMG': 'B',
-    'ORB': 'D+',
-    'Kantar': 'B+',
-    'Deltapoll': 'D+',
-    'NumberCruncherPolitics': 'D',
-    'Focaldata': 'D+',
-    'RedfieldWilton': 'D',
-    'JLPartners': 'D',
-    'FindOutNow': 'D',
-    'Omnisis': 'D',
-    'Techne': 'D',
-    'PeoplePolling': 'D',
-    'MoreinCommon': 'F'
+    "Populus": "D+",
+    "ICM": "D+",
+    "IpsosMORI": "A-",
+    "YouGov": "A-",
+    "SavantaComRes": "B+",
+    "BPIX": "F",
+    "AngusReid": "F",
+    "Harris": "C-",
+    "TNSBMRB": "D",
+    "Opinium": "A-",
+    "Survation": "A-",
+    "LordAshcroft": "D-",
+    "Panelbase": "A-",
+    "BMG": "B",
+    "ORB": "D+",
+    "Kantar": "B+",
+    "Deltapoll": "D+",
+    "NumberCruncherPolitics": "D",
+    "Focaldata": "D+",
+    "RedfieldWilton": "D",
+    "JLPartners": "D",
+    "FindOutNow": "D",
+    "Omnisis": "D",
+    "Techne": "D",
+    "PeoplePolling": "D",
+    "MoreinCommon": "F"
 }
 
 ##################  MODEL DEFAULT PARAMETERS  ##################
