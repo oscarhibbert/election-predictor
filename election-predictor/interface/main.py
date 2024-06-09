@@ -74,6 +74,14 @@ def predict_election(election_year:int) -> dict:
     )
 
     #TODO Train, test split data
+    polls_results_trends_economic['next_elec_date'] = polls_results_trends_economic['next_elec_date'].astype("datetime64[ns]")
+    train_data = polls_results_trends_economic[
+        polls_results_trends_economic['next_elec_date'] < datetime.strptime('2019-12-12', '%Y-%m-%d')
+    ]
+
+    test_data = polls_results_trends_economic[
+        polls_results_trends_economic['next_elec_date'] == datetime.strptime('2019-12-12', '%Y-%m-%d')
+    ]
 
     #TODO Handle preprocessing
 
