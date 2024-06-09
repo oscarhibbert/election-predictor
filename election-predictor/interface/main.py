@@ -57,7 +57,10 @@ def predict_election(election_year:int) -> dict:
     polls_results.drop(columns=['Country'], inplace=True)
     polls_results.rename(columns={'pollster_rating': 'rating'}, inplace=True)
     polls_results.rename(columns={'next_election_date': 'next_elec_date'}, inplace=True)
-
+    polls_results.rename(columns={'days_until_next_election': 'days_to_elec'}, inplace=True)
+    polls_results.drop(columns='Geography', inplace=True)
+    polls_results.drop(columns='election_year', inplace=True)
+    
     #TODO Merge trends on polls_results
     #TODO Merge economic data on polls_results_trends
 
