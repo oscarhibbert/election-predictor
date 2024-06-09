@@ -12,7 +12,8 @@ BQ_CLEANED_DATASET = os.environ['BQ_CLEANED_DATASET']
 
 ##################  DATA SOURCES  ##################
 DATA_SOURCES = ['national_polls', 'national_results', 'constituency_results',
-                'national_google_trends', 'national_wikipedia', 'national_reddit']
+                'national_google_trends', 'national_wikipedia', 'national_reddit',
+                'ons_economic_data']
 DATA_RETRIEVAL = {
     'national_polls': {
         'dataset': '',
@@ -40,6 +41,11 @@ DATA_RETRIEVAL = {
         'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
     },
     'national_reddit': {
+        'dataset': '',
+        'table': '',
+        'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    },
+    'ons_economic_data': {
         'dataset': '',
         'table': '',
         'query': f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
