@@ -19,10 +19,9 @@ DATA_RETRIEVAL = {
         "dataset": "master_sources",
         "table": "national_polls",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
-        "feature_selection": ["samplesize", "days_to_elec", "poll_length",
-                              "rating", "BRX_FC", "CON_FC", "GRE_FC", "LAB_FC",
-                              "LIB_FC", "NAT_FC", "OTH_FC", "PLC_FC",
-                              "SNP_FC", "UKI_FC"]
+        "feature_selection": ['samplesize', 'days_to_elec', 'poll_length',
+                              'rating', 'BRX_FC', 'CON_FC', 'GRE_FC', 'LAB_FC',
+                              'LIB_FC', 'NAT_FC', 'OTH_FC', 'PLC_FC', 'SNP_FC', 'UKI_FC']
     },
     "national_results": {
         "dataset": "master_sources",

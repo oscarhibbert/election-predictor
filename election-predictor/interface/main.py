@@ -152,7 +152,7 @@ def predict_election(election_year:int) -> dict:
             "trained_model": trained_model
         }
 
-    #TODO Handle prediction (ensure input features are transform via preprocessor instance)
+    #Handle prediction (ensure input features are transform via preprocessor instance)
     predict_features = []
     X_predict = np.array(
         preprocessor_pipeline.transform(predict_features)
