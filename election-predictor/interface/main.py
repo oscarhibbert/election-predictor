@@ -153,7 +153,18 @@ def predict_election(election_year:int) -> dict:
         }
 
     #TODO Handle prediction (ensure input features are transform via preprocessor instance)
-    predictions = { }
+    predict_features = []
+    X_predict = np.array(
+        preprocessor_pipeline.transform(predict_features)
+    )
 
-    for party_code, party in train_test_results:
-        pass
+    election_predictions = { }
+
+    for party_code, train_test_result in train_test_results:
+        trained_model = train_test_results
+
+        predicted_vote = trained_model.predict(X_predict)
+
+        election_predictions[party_code] = {
+            "predicted_vote": predicted_vote
+        }
