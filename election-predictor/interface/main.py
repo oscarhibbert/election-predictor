@@ -145,12 +145,9 @@ def predict_election(election_year:int) -> dict:
         # Handle model evaluation
         rmse_score = xgb_regressor.evaluate_model(trained_model, X_test, party_y_test).mean()
 
-        train_test_results.append(
-            {
-                "party": party_code,
-                "rmse_score": rmse_score,
-                "trained_model": trained_model
-            }
-        )
+        train_test_results[party_code] = {
+            "rmse_score": rmse_score,
+            "trained_model": trained_model
+        }
 
     #TODO Handle prediction (ensure input features are transform via preprocessor instance)
