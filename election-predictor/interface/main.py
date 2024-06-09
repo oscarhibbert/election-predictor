@@ -91,10 +91,11 @@ def predict_election(election_year:int) -> dict:
 
 
     # Handle feature selection
-    # TODO feature selection logic for each data source
-    selected_features = ['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
-       'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
-       'OTH_PERCENTAGE','enddate_year_month','Month']
+    # TODO ensure mismatching features from old feature selection match new feature selection from params.py
+    selected_features = DATA_RETRIEVAL["national_polls"]["feature_selection"]
+    # selected_features = ['index','next_elec_date','NAT_ACT', 'BRX_ACT', 'CON_ACT',
+    #    'GRE_ACT', 'LIB_ACT', 'LAB_ACT', 'PLC_ACT', 'SNP_ACT', 'UKI_ACT',
+    #    'OTH_PERCENTAGE','enddate_year_month','Month']
 
     # Handle preprocessing
     processed_train_data, processed_test_data, \
