@@ -11,6 +11,7 @@ BQ_SOURCE_DATASET = os.environ["BQ_SOURCE_DATASET"]
 BQ_CLEANED_DATASET = os.environ["BQ_CLEANED_DATASET"]
 
 ##################  DATA SOURCES  ##################
+DATA_SOURCES_START_DATE = "2004-01-01"
 DATA_SOURCES = ["national_polls", "national_results", "constituency_results",
                 "national_google_trends", "national_wikipedia", "national_reddit",
                 "ons_economic_data"]

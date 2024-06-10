@@ -2,26 +2,47 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
+# Import params
+from election_predictor.params import *
+
 # Import all functions inside data.py from ml_logic
-from ml_logic.data import fetch_clean_data
+from election_predictor.ml_logic.data import fetch_clean_data
 
 # Import preprocessor
-from ml_logic.preprocessor import preprocessor
+from election_predictor.ml_logic.preprocessor import preprocessor
 
 # Import modelling functions from ml_logic
-from ml_logic.model import XGBoostModel
+from election_predictor.ml_logic.model import XGBoostModel
 
 def predict_election(election_year:int) -> dict:
     """
     Predicts the outcome of the specified UK general election.
 
-    :param election_year: The election cycle year to predict.
-    :return: A dictionary containing the predicted election results.
+    :param election_year: The general election year to predict.
+    :return: A dictionary containing the predicted general election results.
     """
 
-    #TODO Handle election cycle date logic
-    # Determine the last election cycle
+    # Handle election cycle date logic
+    election_years = UK_ELECTIONS.keys()
 
+    if str(election_year) not in election_years:
+        raise ValueError(f"{election_year} isn't an election year. Please provide a valid election year.")
+
+    # Handle selecting the last year election year, prior to specified election year
+    election_years_ints = [int(year) for year in election_years]
+
+    # Filter the years to include only those less than or equal to the given election_year
+    past_election_years = [year for year in election_years_ints if year < election_year]
+
+    if not past_election_years:
+        raise ValueError(f"No elections found before the year {election_year}.")
+
+    last_election_year = max(past_election_years)
+
+
+    # Handle data source date start and end range
+    data_source_range_start = DATA_SOURCES_START_DATE
+    data_source_range_end = UK_ELECTIONS[str(last_election_year)]["date"]
 
     # Handle data source fetching and cleaning
     data_sources = list(DATA_RETRIEVAL.keys())
@@ -168,3 +189,5 @@ def predict_election(election_year:int) -> dict:
         election_predictions[party_code] = {
             "predicted_vote": predicted_vote
         }
+
+predict_election(2024)

@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+# Import params
+from election_predictor.params import *
+
 from xgboost import XGBRegressor
 from sklearn.model_selection import cross_val_score
 
