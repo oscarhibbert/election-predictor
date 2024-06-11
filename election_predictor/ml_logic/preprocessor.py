@@ -1,6 +1,6 @@
 # Imports
 from sklearn.compose import make_column_transformer
-from sklearn.preprocessing import MinMaxScaler, OrdinalEncoder
+from sklearn.preprocessing import MinMaxScaler, OrdinalEncoder, OneHotEncoder
 from sklearn.pipeline import make_pipeline
 
 import pandas as pd
@@ -22,17 +22,22 @@ def preprocessor(train_data: pd.DataFrame, test_data: pd.DataFrame) -> dict:
     preprocessor["preprocessor_pipeline"] # Preprocessor pipeline
     """
     # Handle numerical transformer
-    num_columns_selector = ['samplesize', 'days_to_elec', 'poll_length']
+    num_columns_selector = ['samplesize', 'months_to_elec_weight', 'GDP','Inflation','Unemployment']
     num_transformer = MinMaxScaler()
 
     # Handle categorical transformer
     cat_columns_selector = ['rating']
     cat_transformer = make_pipeline(OrdinalEncoder(categories = [['F','D-','D','D+','C-','B','B+','A-']]),MinMaxScaler())
 
+    # Handle party_in_power feature encoding
+    one_hot_encode = OneHotEncoder()
+    one_hot_encode_selector = ['party_in_power']
+
     # Build the preprocessing pipeline
     preproc_pipeline = make_column_transformer(
         (num_transformer, num_columns_selector),
         (cat_transformer, cat_columns_selector),
+        (one_hot_encode, one_hot_encode_selector),
         remainder='passthrough',
         verbose_feature_names_out=False
     )

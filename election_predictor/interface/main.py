@@ -98,6 +98,8 @@ def predict_election() -> dict:
        'NAT_trends']:
             polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
 
+    
+
     ########## OLD CODE IS BELOW THIS LINE ##########
     # Handle data source merging
     # Merge results on polls and some additional cleaning
