@@ -51,6 +51,54 @@ def predict_election() -> dict:
     national_polls_results_combined, constituency_bias, national_google_trends, \
     ons_economic_data = clean_data_sources
 
+
+    # Handle polls and results combined cleaning
+    national_polls_results_combined['enddate'] = \
+        pd.to_datetime(national_polls_results_combined['enddate'])
+
+    national_polls_results_combined['next_elec_date'] = \
+        pd.to_datetime(national_polls_results_combined['next_elec_date'])
+
+    national_polls_results_combined['startdate'] = \
+        pd.to_datetime(national_polls_results_combined['startdate'])
+
+    # Create poll end date field pre-join with Trends and Economic data
+    national_polls_results_combined['enddate_year_month'] = \
+        pd.to_datetime(national_polls_results_combined['enddate']).dt.to_period('M')
+
+    national_polls_results_combined.enddate_year_month = \
+        pd.to_datetime(national_polls_results_combined.enddate_year_month.astype('str'))
+
+    # Merge polls_results_combined with national_trends
+    polls_results_trends = \
+        pd.merge(
+            national_polls_results_combined,
+            national_google_trends,
+            how='left',
+            left_on='enddate_year_month',
+            right_on='Month'
+        )
+
+    # Handle ons_economic_data cleaning
+    ons_economic_data['Month'] = pd.to_datetime(ons_economic_data['Month'])
+
+    # Merge polls_results_trends with ons_economic_data
+    polls_results_trends_ons = \
+        pd.merge(
+            polls_results_trends,
+            ons_economic_data,
+            how='left',
+            left_on='enddate_year_month',
+            right_on='Month'
+        )
+
+    # Handle manual scaling for trends columns
+    for column in ['LAB_trends', 'CON_trends', 'LIB_trends',
+       'GRE_trends', 'BRX_trends', 'PLC_trends', 'SNP_trends', 'UKI_trends',
+       'NAT_trends']:
+            polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
+
+    ########## OLD CODE IS BELOW THIS LINE ##########
     # Handle data source merging
     # Merge results on polls and some additional cleaning
     polls_results = national_polls.merge(national_results, on='election_year', how='left')
