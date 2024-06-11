@@ -16,6 +16,11 @@ DATA_SOURCES = ["national_polls", "national_results", "constituency_results",
                 "national_google_trends", "national_wikipedia", "national_reddit",
                 "ons_economic_data"]
 DATA_RETRIEVAL = {
+    "national_polls_results_combined": {
+        "dataset": "master_sources",
+        "table": "national_polls_results_combined",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    },
     "national_polls": {
         "dataset": "master_sources",
         "table": "national_polls",
@@ -33,6 +38,11 @@ DATA_RETRIEVAL = {
         "dataset": "master_sources",
         "table": "constinuency_results",
         "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+    },
+    "constituency_bias": {
+        "dataset": "master_sources",
+        "table": "constituency_bias",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
     },
     "national_google_trends": {
         "dataset": "master_sources",

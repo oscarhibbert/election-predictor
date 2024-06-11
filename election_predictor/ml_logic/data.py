@@ -246,6 +246,15 @@ def fetch_clean_data(data_source: str | list) -> list:
 
         data["constituency_results"] = clean_constituency_results(constituency_results)
 
+    if data_source == "constituency_bias":
+        constituency_bias = get_data(
+            GCP_PROJECT_ID,
+            DATA_RETRIEVAL["constituency_bias"]["query"]
+        )
+
+        # constituency_bias is cleaned and does not require cleaning logic
+        data["constituency_bias"] = constituency_bias
+
     if data_source == "national_google_trends":
         national_google_trends = get_data(
             GCP_PROJECT_ID,
@@ -272,7 +281,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         )
 
         # national_reddit is cleaned and does not require cleaning logic
-        data["natioanl_reddit"] = national_reddit
+        data["national_reddit"] = national_reddit
 
     if data_source == "ons_economic_data":
         ons_economic_data = get_data(

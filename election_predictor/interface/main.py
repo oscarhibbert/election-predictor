@@ -14,38 +14,34 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
-#TODO add new parameter to handle cutoffs for train and test data
-#TODO see crazy models
-def predict_election(election_year:int,cutoff_days:int) -> dict:
+def predict_election() -> dict:
     """
-    Predicts the outcome of the specified UK general election.
+    Predicts the outcome of the 2024 UK general election.
 
-    :param election_year: The general election year to predict.
-    :parama cutoff_days: The number of days to subtract from the election date.
-    :return: A dictionary containing the predicted general election results.
+    :return: A dictionary containing the predicted general election vote share and projected seats.
     """
 
-    # Handle election cycle date logic
-    election_years = UK_ELECTIONS.keys()
+    # # Handle election cycle date logic
+    # election_years = UK_ELECTIONS.keys()
 
-    if str(election_year) not in election_years:
-        raise ValueError(f"{election_year} isn't an election year. Please provide a valid election year.")
+    # if str(election_year) not in election_years:
+    #     raise ValueError(f"{election_year} isn't an election year. Please provide a valid election year.")
 
-    # Handle selecting the last year election year, prior to specified election year
-    election_years_ints = [int(year) for year in election_years]
+    # # Handle selecting the last year election year, prior to specified election year
+    # election_years_ints = [int(year) for year in election_years]
 
-    # Filter the years to include only those less than or equal to the given election_year
-    past_election_years = [year for year in election_years_ints if year < election_year]
+    # # Filter the years to include only those less than or equal to the given election_year
+    # past_election_years = [year for year in election_years_ints if year < election_year]
 
-    if not past_election_years:
-        raise ValueError(f"No elections found before the year {election_year}.")
+    # if not past_election_years:
+    #     raise ValueError(f"No elections found before the year {election_year}.")
 
-    last_election_year = max(past_election_years)
+    # last_election_year = max(past_election_years)
 
 
-    # Handle data source date start and end range
-    data_source_range_start = DATA_SOURCES_START_DATE
-    data_source_range_end = UK_ELECTIONS[str(last_election_year)]["date"]
+    # # Handle data source date start and end range
+    # data_source_range_start = DATA_SOURCES_START_DATE
+    # data_source_range_end = UK_ELECTIONS[str(last_election_year)]["date"]
 
     # Handle data source fetching and cleaning
     data_sources = list(DATA_RETRIEVAL.keys())
