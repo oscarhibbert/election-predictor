@@ -48,8 +48,7 @@ def predict_election() -> dict:
 
     clean_data_sources = fetch_clean_data(data_sources)
 
-    national_polls, national_results, constituency_results, \
-    national_google_trends, national_wikipedia, national_reddit, \
+    national_polls_results_combined, constituency_bias, national_google_trends, \
     ons_economic_data = clean_data_sources
 
     # Handle data source merging

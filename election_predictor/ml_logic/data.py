@@ -192,7 +192,7 @@ def fetch_clean_data(data_source: str | list) -> list:
 
     :param data_source: The data sources to be fetched and cleaned.
     :type data_source: str or list
-    :return: A list of cleaned DataFrames.
+    :return: A dictionary containing cleaned DataFrames for respective data sources.
 
     :example:
     >>> fetch_clean_data("national_polls")
