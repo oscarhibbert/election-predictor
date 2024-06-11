@@ -14,11 +14,14 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
-def predict_election(election_year:int) -> dict:
+#TODO add new parameter to handle cutoffs for train and test data
+#TODO see crazy models
+def predict_election(election_year:int,cutoff_days:int) -> dict:
     """
     Predicts the outcome of the specified UK general election.
 
     :param election_year: The general election year to predict.
+    :parama cutoff_days: The number of days to subtract from the election date.
     :return: A dictionary containing the predicted general election results.
     """
 

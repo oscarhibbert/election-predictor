@@ -204,8 +204,8 @@ def fetch_clean_data(data_source: str | list) -> list:
     # Set data sources from params
     data_sources = DATA_SOURCES
 
-    # Set list for return
-    data = []
+    # Set an empty dictionary to store data
+    data = { }
 
     # Handle empty parameter
     if data_source is None:
@@ -227,7 +227,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         )
 
         # national_polls source is cleaned and does not require cleaning logic
-        data.append(national_polls)
+        data["national_polls"] = national_polls
 
     if data_source == "national_results":
         national_results = get_data(
@@ -236,7 +236,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         )
 
         # national_results is cleaned and does not require cleaning logic
-        data.append(national_results)
+        data["national_results"] = national_results
 
     if data_source == "constituency_results":
         constituency_results = get_data(
@@ -244,9 +244,7 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["constituency_results"]["query"]
         )
 
-        constituency_results_cleaned = clean_constituency_results(constituency_results)
-
-        data.append(constituency_results_cleaned)
+        data["constituency_results"] = clean_constituency_results(constituency_results)
 
     if data_source == "national_google_trends":
         national_google_trends = get_data(
@@ -254,9 +252,8 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["national_google_trends"]["query"]
         )
 
-        national_google_trends_cleaned = clean_national_google_trends(national_google_trends)
-
-        data.append(national_google_trends_cleaned)
+        # national_google_trends is cleaned and does not require cleaning logic
+        data["national_google_trends"] = national_google_trends
 
     if data_source == "national_wikipedia":
         national_wikipedia = get_data(
@@ -266,7 +263,7 @@ def fetch_clean_data(data_source: str | list) -> list:
 
         national_wikipedia_cleaned = clean_national_wikipedia(national_wikipedia)
 
-        data.append(national_wikipedia_cleaned)
+        data["national_wikipedia"] = national_wikipedia_cleaned
 
     if data_source == "national_reddit":
         national_reddit = get_data(
@@ -274,9 +271,8 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["national_reddit"]["query"]
         )
 
-        national_reddit_cleaned = clean_national_reddit(national_reddit)
-
-        data.append(national_reddit_cleaned)
+        # national_reddit is cleaned and does not require cleaning logic
+        data["natioanl_reddit"] = national_reddit
 
     if data_source == "ons_economic_data":
         ons_economic_data = get_data(
@@ -284,8 +280,7 @@ def fetch_clean_data(data_source: str | list) -> list:
             DATA_RETRIEVAL["ons_economic_data"]["query"]
         )
 
-        ons_economic_data_cleaned = clean_ons_economic_data(ons_economic_data)
-
-        data.append(ons_economic_data_cleaned)
+        # ons_economic_data is cleaned and does not require cleaning logic
+        data["ons_economic_data"] = ons_economic_data
 
     return data
