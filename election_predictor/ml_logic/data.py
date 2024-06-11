@@ -6,6 +6,7 @@ from colorama import Fore, Style
 
 from election_predictor.params import *
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
+from google.oauth2 import service_account
 
 #TODO Create data cleaning functions for each data source
 def clean_national_polls(national_polls_dataframe: pd.DataFrame) -> dict:
@@ -175,8 +176,11 @@ def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
     """
     Load data from Google BigQuery and return as a dataframe.
     """
+    credentials = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_KEY)
+
     print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
-    client = bigquery.Client(project=gcp_project)
+
+    client = bigquery.Client(project=gcp_project, credentials=credentials)
     query_job = client.query(query)
     result = query_job.result()
     df = result.to_dataframe()
@@ -202,7 +206,7 @@ def fetch_clean_data(data_source: str | list) -> list:
     >>> fetch_clean_data(["national_polls", "national_results"])
     """
     # Set data sources from params
-    data_sources = DATA_SOURCES
+    data_sources = list(DATA_RETRIEVAL.keys())
 
     # Set an empty dictionary to store data
     data = { }
@@ -215,12 +219,12 @@ def fetch_clean_data(data_source: str | list) -> list:
     if not isinstance(data_source, (str, list)):
         raise ValueError("Invalid parameter type. Please specify a str or list.")
 
-    # Handle invalid data source
-    if data_source not in data_sources:
-        raise ValueError("Invalid data source. Please specify a valid data source.")
+    # # Handle invalid data source
+    # if data_source not in data_sources:
+    #     raise ValueError("Invalid data source. Please specify a valid data source.")
 
     # Handle national polls
-    if data_source == "national_polls":
+    if "national_polls" in data_source:
         national_polls = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["national_polls"]["query"]
@@ -229,7 +233,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         # national_polls source is cleaned and does not require cleaning logic
         data["national_polls"] = national_polls
 
-    if data_source == "national_results":
+    if "national_results" in data_source:
         national_results = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["national_results"]["query"]
@@ -238,7 +242,16 @@ def fetch_clean_data(data_source: str | list) -> list:
         # national_results is cleaned and does not require cleaning logic
         data["national_results"] = national_results
 
-    if data_source == "constituency_results":
+    if "national_polls_results_combined" in data_source:
+        national_polls_results_combined = get_data(
+            GCP_PROJECT_ID,
+            DATA_RETRIEVAL["national_polls_results_combined"]["query"]
+        )
+
+        # national_polls_results_combined is cleaned and does not require cleaning logic
+        data["national_polls_results_combined"] = national_polls_results_combined
+
+    if "constituency_results" in data_source:
         constituency_results = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["constituency_results"]["query"]
@@ -246,7 +259,7 @@ def fetch_clean_data(data_source: str | list) -> list:
 
         data["constituency_results"] = clean_constituency_results(constituency_results)
 
-    if data_source == "constituency_bias":
+    if "constituency_bias" in data_source:
         constituency_bias = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["constituency_bias"]["query"]
@@ -255,7 +268,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         # constituency_bias is cleaned and does not require cleaning logic
         data["constituency_bias"] = constituency_bias
 
-    if data_source == "national_google_trends":
+    if "national_google_trends" in data_source:
         national_google_trends = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["national_google_trends"]["query"]
@@ -264,7 +277,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         # national_google_trends is cleaned and does not require cleaning logic
         data["national_google_trends"] = national_google_trends
 
-    if data_source == "national_wikipedia":
+    if "national_wikipedia" in data_source:
         national_wikipedia = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["national_wikipedia"]["query"]
@@ -274,7 +287,7 @@ def fetch_clean_data(data_source: str | list) -> list:
 
         data["national_wikipedia"] = national_wikipedia_cleaned
 
-    if data_source == "national_reddit":
+    if "national_reddit" in data_source:
         national_reddit = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["national_reddit"]["query"]
@@ -283,7 +296,7 @@ def fetch_clean_data(data_source: str | list) -> list:
         # national_reddit is cleaned and does not require cleaning logic
         data["national_reddit"] = national_reddit
 
-    if data_source == "ons_economic_data":
+    if "ons_economic_data" in data_source:
         ons_economic_data = get_data(
             GCP_PROJECT_ID,
             DATA_RETRIEVAL["ons_economic_data"]["query"]

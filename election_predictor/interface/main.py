@@ -44,7 +44,7 @@ def predict_election() -> dict:
     # data_source_range_end = UK_ELECTIONS[str(last_election_year)]["date"]
 
     # Handle data source fetching and cleaning
-    data_sources = list(DATA_RETRIEVAL.keys())
+    data_sources = ["national_polls_results_combined","constituency_bias", "national_google_trends","ons_economic_data"]
 
     clean_data_sources = fetch_clean_data(data_sources)
 
@@ -98,7 +98,14 @@ def predict_election() -> dict:
        'NAT_trends']:
             polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
 
-    
+    # Handle election cycle date logic
+    election_date = datetime.strptime(UK_ELECTIONS["2024"], "%Y-%m-%d")
+    cutoff_date = election_date - datetime.timedelta(days=54)
+
+    last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
+    prediction_date = election_date - datetime.timedelta(days=24)
+
+
 
     ########## OLD CODE IS BELOW THIS LINE ##########
     # Handle data source merging
@@ -238,4 +245,4 @@ def predict_election() -> dict:
             "predicted_vote": predicted_vote
         }
 
-predict_election(2024)
+predict_election()

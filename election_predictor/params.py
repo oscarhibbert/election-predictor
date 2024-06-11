@@ -19,12 +19,12 @@ DATA_RETRIEVAL = {
     "national_polls_results_combined": {
         "dataset": "master_sources",
         "table": "national_polls_results_combined",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_polls_results_combined"
     },
     "national_polls": {
         "dataset": "master_sources",
         "table": "national_polls",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_polls",
         "feature_selection": ['samplesize', 'days_to_elec', 'poll_length',
                               'rating', 'BRX_FC', 'CON_FC', 'GRE_FC', 'LAB_FC',
                               'LIB_FC', 'NAT_FC', 'OTH_FC', 'PLC_FC', 'SNP_FC', 'UKI_FC']
@@ -32,22 +32,22 @@ DATA_RETRIEVAL = {
     "national_results": {
         "dataset": "master_sources",
         "table": "national_results",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_results"
     },
     "constituency_results": {
         "dataset": "master_sources",
         "table": "constinuency_results",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table"
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.constinuency_results"
     },
     "constituency_bias": {
         "dataset": "master_sources",
         "table": "constituency_bias",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.constituency_bias",
     },
     "national_google_trends": {
         "dataset": "master_sources",
         "table": "national_google_trends",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_google_trends",
         "feature_selection": ["LAB_trends", "CON_trends", "LIB_trends",
                               "GRE_trends", "BRX_trends", "PLC_trends",
                               "SNP_trends", "UKI_trends", "NAT_trends"]
@@ -55,19 +55,19 @@ DATA_RETRIEVAL = {
     "national_wikipedia": {
         "dataset": "master_sources",
         "table": "national_wikipedia",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_wikipedia",
         "feature_selection": ""
     },
     "national_reddit": {
         "dataset": "master_sources",
         "table": "national_reddit",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.national_reddit",
         "feature_selection": ""
     },
     "ons_economic_data": {
         "dataset": "master_sources",
         "table": "ons_economic_data",
-        "query": f"SELECT * FROM {GCP_PROJECT_ID}.dataset.table",
+        "query": f"SELECT * FROM {GCP_PROJECT_ID}.master_sources.ons_economic_data",
         "feature_selection": ["GDP", "Inflation", "Unemployment"]
     }
 }
