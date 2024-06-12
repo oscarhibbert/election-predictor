@@ -49,8 +49,7 @@ def predict_election() -> dict:
     clean_data_sources = fetch_clean_data(data_sources)
 
     national_polls_results_combined, constituency_bias, national_google_trends, \
-    ons_economic_data = clean_data_sources
-
+    ons_economic_data = clean_data_sources.values()
 
     # Handle polls and results combined cleaning
     national_polls_results_combined['enddate'] = \
@@ -371,4 +370,4 @@ def predict_election() -> dict:
 #             "predicted_vote": predicted_vote
 #         }
 
-# predict_election()
+predict_election()
