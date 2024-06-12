@@ -100,12 +100,24 @@ def predict_election() -> dict:
 
     # Handle election cycle date logic
     election_date = datetime.strptime(UK_ELECTIONS["2024"], "%Y-%m-%d")
+    #TODO Seperate poll window and days from today until election into seperate vars
     cutoff_date = election_date - datetime.timedelta(days=54)
 
     last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
     prediction_date = election_date - datetime.timedelta(days=24)
 
+    # Handle train and test data splitting
+    train_data = polls_results_trends_ons[
+        polls_results_trends_ons["startdate"] > "2003-12-31"]
 
+    train_data = train_data[train_data["startdate"] < cutoff_date]
+
+    test_data = polls_results_trends_ons[
+        (polls_results_trends_ons[
+            "startdate"] >= cutoff_date) & (polls_results_trends_ons[
+                "startdate"] <= prediction_date)]
+
+    test_data = test_data[test_data["next_elec_date"] == election_date]
 
     ########## OLD CODE IS BELOW THIS LINE ##########
     # Handle data source merging
