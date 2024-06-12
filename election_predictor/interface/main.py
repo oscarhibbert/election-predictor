@@ -119,6 +119,119 @@ def predict_election() -> dict:
 
     test_data = test_data[test_data["next_elec_date"] == election_date]
 
+    # Handle preprocessing
+    processed_train_data, processed_test_data, \
+    preprocessor_pipeline = preprocessor(train_data, test_data)
+
+    #TODO update feature selection via params.py instead of .drop use .select
+    X_train = processed_train_data.drop(
+        columns=['enddate_year_month', 'Month_y', 'startdate', 'enddate',
+                 'pollster', 'Unnamed: 0', 'next_elec_date', 'days_to_elec',
+                 'months_to_elec', 'party_in_power_Labour', 'LAB_ACT', 'CON_ACT',
+                 'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT',
+                 'OTH_ACT']
+    )
+
+    X_train = preprocessor_pipeline.fit_transform(train_data)
+
+    X_test = processed_test_data.drop(
+        columns=['enddate_year_month', 'Month_y', 'startdate', 'enddate',
+                 'pollster', 'Unnamed: 0', 'next_elec_date', 'days_to_elec',
+                 'months_to_elec', 'party_in_power_Labour', 'LAB_ACT',
+                 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT',
+                 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']
+    )
+
+    X_test = preprocessor_pipeline.transform(X_test)
+
+    # Handle matrix conversion for train and test feature data
+    X_train = np.array(X_train)
+    X_test = np.array(X_test)
+
+    # Handle target data
+    selected_targets = ['next_elec_date', 'LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT',
+                        'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']
+
+    y_train = processed_train_data[selected_targets]
+    y_test = processed_test_data[selected_targets]
+
+    # Handle y_train results cleaning (create a fake election result)
+    # (removes actuals results, we are trying to predict)
+    y_train.loc[y_train['next_elec_date'] == election_date,
+         ['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']] = np.nan
+
+    # Fetch mean value of X_test
+    X_test_median = X_test.mean()
+
+    # Create imputation for y_train to impute over actuals we are trying to predict
+    imputation_values = {
+        'CON_ACT': X_test_median['CON_FC'],
+        'LAB_ACT': X_test_median['LAB_FC'],
+        'LIB_ACT': X_test_median['LIB_FC'],
+        'BRX_ACT': X_test_median['BRX_FC'],
+        'GRE_ACT': X_test_median['GRE_FC'],
+        'OTH_ACT': X_test_median['OTH_FC'],
+        'PLC_ACT': X_test_median['PLC_FC'],
+        'SNP_ACT': X_test_median['SNP_FC'],
+        'UKI_ACT': X_test_median['UKI_FC']
+    }
+
+    y_train = y_train.fillna(value=imputation_values)
+
+    # Finally drop month_x columns from X_train and X_test
+    X_train.drop(columns=['Month_x'], inplace=True)
+    X_test.drop(columns=['Month_x'], inplace=True)
+
+    # Handle training and testing UK GE parties vote share
+    parties = [
+        'LAB', 'CON', 'LIB', 'GRE', 'BRX', 'NAT', 'SNP', 'UKI', 'PLC',
+        'OTH'
+    ]
+
+    train_test_results = { }
+
+    for party_code, party in parties:
+        # Set party target train and test
+        party_y_train = y_train[party_code]
+        party_y_test = y_test[party_code]
+
+        # Handle XGBoost Regressor modelling
+        # Handle model fetch and initialisation
+        xgb_regressor = XGBoostModel()
+        xgb_regressor.initialize_model()
+
+        # Handle model compiling
+        xgb_regressor.compile_model() # Uses default model parameters from params.py
+
+        # Handle model training
+        trained_model = xgb_regressor.train_model(X_train, party_y_train)
+
+        # Handle model evaluation
+        rmse_score = xgb_regressor.evaluate_model(trained_model, X_test, party_y_test).mean()
+
+        train_test_results[party_code] = {
+            "rmse_score": rmse_score,
+            "trained_model": trained_model
+        }
+
+    #Handle prediction (ensure input features are transform via preprocessor instance)
+    predict_features = []
+    X_predict = np.array(
+        preprocessor_pipeline.transform(predict_features)
+    )
+
+    election_predictions = { }
+
+    for party_code, train_test_result in train_test_results:
+        trained_model = train_test_results
+
+        predicted_vote = trained_model.predict(X_predict)
+
+        election_predictions[party_code] = {
+            "predicted_vote": predicted_vote
+        }
+
+
     ########## OLD CODE IS BELOW THIS LINE ##########
     # Handle data source merging
     # Merge results on polls and some additional cleaning
