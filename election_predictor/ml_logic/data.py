@@ -8,6 +8,8 @@ from election_predictor.params import *
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 from google.oauth2 import service_account
 
+#TODO Add ABS class blueprint for cleaning functions and combined cleaned / fetch functions
+
 #TODO Create data cleaning functions for each data source
 def clean_national_polls(national_polls_dataframe: pd.DataFrame) -> dict:
     """
