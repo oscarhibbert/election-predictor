@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Import params
 from election_predictor.params import *
@@ -68,6 +68,9 @@ def predict_election() -> dict:
     national_polls_results_combined.enddate_year_month = \
         pd.to_datetime(national_polls_results_combined.enddate_year_month.astype('str'))
 
+    #TODO Handle dtype clean for the Month column in national_google_trends in data.py
+    national_google_trends['Month'] = pd.to_datetime(national_google_trends['Month'])
+
     # Merge polls_results_combined with national_trends
     polls_results_trends = \
         pd.merge(
@@ -98,12 +101,14 @@ def predict_election() -> dict:
             polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
 
     # Handle election cycle date logic
-    election_date = datetime.strptime(UK_ELECTIONS["2024"], "%Y-%m-%d")
+    election_date = UK_ELECTIONS.get("2024")
+    election_date = datetime.strptime(election_date["date"], "%Y-%m-%d")
+
     #TODO Seperate poll window and days from today until election into seperate vars
-    cutoff_date = election_date - datetime.timedelta(days=54)
+    cutoff_date = election_date - timedelta(days=54)
 
     last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
-    prediction_date = election_date - datetime.timedelta(days=24)
+    prediction_date = election_date - timedelta(days=24)
 
     # Handle train and test data splitting
     train_data = polls_results_trends_ons[
@@ -119,27 +124,22 @@ def predict_election() -> dict:
     test_data = test_data[test_data["next_elec_date"] == election_date]
 
     # Handle preprocessing
-    processed_train_data, processed_test_data, \
-    preprocessor_pipeline = preprocessor(train_data, test_data)
+    preprocessor_pipeline = preprocessor()
 
-    #TODO update feature selection via params.py instead of .drop use .select
-    X_train = processed_train_data.drop(
-        columns=['enddate_year_month', 'Month_y', 'startdate', 'enddate',
-                 'pollster', 'Unnamed: 0', 'next_elec_date', 'days_to_elec',
-                 'months_to_elec', 'party_in_power_Labour', 'LAB_ACT', 'CON_ACT',
+    #TODO Update feature selection via params.py instead of .drop use .select
+    #TODO Refactor preproc logic into preprocessor.py
+
+    drop_columns = ['enddate_year_month', 'Month_y', 'startdate', 'enddate',
+                 'pollster', 'next_elec_date', 'days_to_elec',
+                 'months_to_elec', 'LAB_ACT', 'CON_ACT',
                  'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT',
                  'OTH_ACT']
-    )
 
-    X_train = preprocessor_pipeline.fit_transform(train_data)
+    X_train = train_data.drop(columns=drop_columns)
 
-    X_test = processed_test_data.drop(
-        columns=['enddate_year_month', 'Month_y', 'startdate', 'enddate',
-                 'pollster', 'Unnamed: 0', 'next_elec_date', 'days_to_elec',
-                 'months_to_elec', 'party_in_power_Labour', 'LAB_ACT',
-                 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT',
-                 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']
-    )
+    X_train = preprocessor_pipeline.fit_transform(X_train)
+
+    X_test = test_data.drop(columns=drop_columns)
 
     X_test = preprocessor_pipeline.transform(X_test)
 

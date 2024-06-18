@@ -5,7 +5,8 @@ from sklearn.pipeline import make_pipeline
 
 import pandas as pd
 
-def preprocessor(train_data: pd.DataFrame, test_data: pd.DataFrame) -> dict:
+# def preprocessor(train_data: pd.DataFrame, test_data: pd.DataFrame) -> dict:
+def preprocessor() -> dict:
     """
     Preprocesses train and test DataFrames.
 
@@ -42,15 +43,16 @@ def preprocessor(train_data: pd.DataFrame, test_data: pd.DataFrame) -> dict:
         verbose_feature_names_out=False
     )
 
-    # Fit and transform training data
-    train_data_processed = preproc_pipeline.fit_transform(train_data)
+    # # Fit and transform training data
+    # train_data_processed = preproc_pipeline.fit_transform(train_data)
 
-    # Transform test data
-    test_data_processed = preproc_pipeline.transform(test_data)
+    # # Transform test data
+    # test_data_processed = preproc_pipeline.transform(test_data)
 
-    # Return processed data, and pipeline
-    return {
-        "processed_train_data": train_data_processed,
-        "processed_test_data": test_data_processed,
-        "preprocessor_pipeline": preproc_pipeline
-    }
+    # Return pipeline
+    # return {
+    #     "processed_train_data": train_data_processed,
+    #     "processed_test_data": test_data_processed,
+    #     "preprocessor_pipeline": preproc_pipeline
+    # }
+    return preproc_pipeline
