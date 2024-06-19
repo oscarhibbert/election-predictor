@@ -36,14 +36,80 @@ class BaseData(ABC):
         """
         pass
 
-# Handle National Polls Data
+# Handle national polls data
 class NationalPolls(BaseData):
     """
     Fetch and clean national polls data.
     """
     def __init__(self):
-        self.data_source = "national_polls"
+        self.data_source = ""
 
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
+# Handle national election results data
+class NationalResults(BaseData):
+    """
+    Fetch and clean national election results data.
+    """
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
+# Handle national Google Trends data
+class NationalGoogleTrends(BaseData):
+    """
+    Fetch and clean national Google Trends data.
+    """
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
+# Handle national Wikipedia data
+class NationalWikipedia(BaseData):
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
+# Handle ONS economic data
+class ONSEconomic(BaseData):
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
+# Handle national Reddit data
+class NationalReddit(BaseData):
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
 
 #TODO Complete factory function
 # Factory function handles data retrieval
@@ -224,24 +290,6 @@ def clean_ons_economic_data(ons_economic_dataframe: pd.DataFrame) -> pd.DataFram
 #TODO Create clean function for Reddit data once built by CK
 def clean_national_reddit():
     pass
-
-#TODO Get data should cache data locally to prevent repeated data loading
-def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
-    """
-    Load data from Google BigQuery and return as a dataframe.
-    """
-    credentials = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_KEY)
-
-    print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
-
-    client = bigquery.Client(project=gcp_project, credentials=credentials)
-    query_job = client.query(query)
-    result = query_job.result()
-    df = result.to_dataframe()
-
-    print(f"✅ Data loaded, with shape {df.shape}")
-
-    return df
 
 # Create master fetch and clean function
 def fetch_clean_data(data_source: str | list) -> list:

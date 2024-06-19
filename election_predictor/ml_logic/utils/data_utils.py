@@ -3,6 +3,8 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from colorama import Fore, Style
 
+from election_predictor.params import *
+
 
 #TODO Get data should cache data locally to prevent repeated data loading
 def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
