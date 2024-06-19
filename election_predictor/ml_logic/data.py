@@ -1,4 +1,5 @@
 # Imports
+from abc import ABC, abstractmethod
 import pandas as pd
 from  datetime import datetime
 from google.cloud import bigquery
@@ -8,7 +9,58 @@ from election_predictor.params import *
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 from google.oauth2 import service_account
 
-#TODO Add ABS class blueprint for cleaning functions and combined cleaned / fetch functions
+# Blueprint for all data functions using abstract base class
+class BaseData(ABC):
+    """
+    Abstract Base Class for all data functions. Defines the interface that all data functions must implement.
+    """
+
+    @abstractmethod
+    def get_data(self, date_range: dict, *args, **kwargs) -> pd.DataFrame:
+        """
+        Fetch data from the specified source and return it as a DataFrame.
+
+        :param date_range: The date range for which to fetch data inclusive.
+        :type date_range: dict.
+        :return: A DataFrame containing the fetched and cleaned data.
+
+        :example:
+        >>> get_data(date_range={"start_date": "2021-01-01", "end_date": "2021-12-31"})
+        """
+        pass
+
+    @abstractmethod
+    def clean_data(self, data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
+        """
+        Clean the data and return it as a DataFrame.
+        """
+        pass
+
+# Handle National Polls Data
+class NationalPolls(BaseData):
+    """
+    Fetch and clean national polls data.
+    """
+    def __init__(self):
+        self.data_source = "national_polls"
+
+
+#TODO Complete factory function
+# Factory function handles data retrieval
+def data_factory(data_source: str) -> BaseData:
+    """
+    Factory function that returns the specified data source class.
+
+    :param data_source: The data source class to be returned.
+    :type data_source: str.
+    :return: The specified data source class.
+
+    :example:
+    >>> data_factory("national_polls")
+    """
+    if data_source == "national_polls":
+        return NationalPolls()
+
 
 #TODO Create data cleaning functions for each data source
 def clean_national_polls(national_polls_dataframe: pd.DataFrame) -> dict:
