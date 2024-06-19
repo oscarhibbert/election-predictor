@@ -143,12 +143,16 @@ def predict_election() -> dict:
 
     X_test = preprocessor_pipeline.transform(X_test)
 
+    # Convert train and test features back into DataFrames
+    X_train = pd.DataFrame(X_train, columns=preprocessor_pipeline.get_feature_names_out())
+    X_test = pd.DataFrame(X_test, columns=preprocessor_pipeline.get_feature_names_out())
+
     # Handle target data
     selected_targets = ['next_elec_date', 'LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT',
                         'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']
 
-    y_train = processed_train_data[selected_targets]
-    y_test = processed_test_data[selected_targets]
+    y_train = train_data[selected_targets]
+    y_test = test_data[selected_targets]
 
     # Handle y_train results cleaning (create a fake election result)
     # (removes actuals results, we are trying to predict)
@@ -190,10 +194,10 @@ def predict_election() -> dict:
 
     train_test_results = { }
 
-    for party_code, party in parties:
+    for party, party_code in enumerate(parties):
         # Set party target train and test
-        party_y_train = y_train[party_code]
-        party_y_test = y_test[party_code]
+        party_y_train = y_train[party_code + "_ACT"]
+        party_y_test = y_test[party_code + "_ACT"]
 
         # Handle XGBoost Regressor modelling
         # Handle model fetch and initialisation
