@@ -74,14 +74,14 @@ class XGBoostModel(BaseModel):
 
     def compile_model(
         self,
-        model: XGBRegressor,
-        learning_rate: XGBOOST_PARAMS["learning_rate"],
-        n_estimators: XGBOOST_PARAMS["n_estimators"],
-        max_depth: XGBOOST_PARAMS["max_depth"],
-        subsample: XGBOOST_PARAMS["subsample"],
-        objective: XGBOOST_PARAMS["objective"],
-        nthread: XGBOOST_PARAMS["nthread"],
-        enable_categorical: XGBOOST_PARAMS["enable_categorical"]
+        model: XGBRegressor = None,
+        learning_rate: float = XGBOOST_PARAMS["learning_rate"],
+        n_estimators: int = XGBOOST_PARAMS["n_estimators"],
+        max_depth: int = XGBOOST_PARAMS["max_depth"],
+        subsample: float = XGBOOST_PARAMS["subsample"],
+        objective: str = XGBOOST_PARAMS["objective"],
+        nthread: int = XGBOOST_PARAMS["nthread"],
+        enable_categorical: bool = XGBOOST_PARAMS["enable_categorical"]
     ) -> XGBRegressor:
         """
         Compiles the XGBoost Regressor model with the provided parameters. Default

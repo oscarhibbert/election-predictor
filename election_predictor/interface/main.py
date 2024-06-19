@@ -159,7 +159,7 @@ def predict_election() -> dict:
     y_train.loc[y_train['next_elec_date'] == election_date,
          ['LAB_ACT', 'CON_ACT', 'LIB_ACT', 'GRE_ACT', 'BRX_ACT', 'SNP_ACT', 'UKI_ACT', 'PLC_ACT', 'OTH_ACT']] = np.nan
 
-    # Fetch mean value of X_test
+    # Fetch mean values of each value in X_test
     X_test_median = X_test.mean()
 
     # Create imputation for y_train to impute over actuals we are trying to predict
@@ -176,10 +176,12 @@ def predict_election() -> dict:
     }
 
     y_train = y_train.fillna(value=imputation_values)
+    y_train = y_train.fillna(value=0)
 
     # Finally drop month_x columns from X_train and X_test
     X_train.drop(columns=['Month_x'], inplace=True)
     X_test.drop(columns=['Month_x'], inplace=True)
+
 
     # Handle training and testing UK GE parties vote share
 
@@ -192,7 +194,7 @@ def predict_election() -> dict:
         'OTH'
     ]
 
-    train_test_results = { }
+    trained_models = { }
 
     for party, party_code in enumerate(parties):
         # Set party target train and test
@@ -202,23 +204,26 @@ def predict_election() -> dict:
         # Handle XGBoost Regressor modelling
         # Handle model fetch and initialisation
         xgb_regressor = XGBoostModel()
-        xgb_regressor.initialize_model()
+        xgbr_model = xgb_regressor.initialize_model()
 
         # Handle model compiling
-        xgb_regressor.compile_model() # Uses default model parameters from params.py
+        xgb_regressor.compile_model(xgbr_model) # Uses default model parameters from params.py
 
         # Handle model training
-        trained_model = xgb_regressor.train_model(X_train, party_y_train)
+        trained_model = xgb_regressor.train_model(xgbr_model, X_train, party_y_train)
 
-        # Handle model evaluation
-        rmse_score = xgb_regressor.evaluate_model(trained_model, X_test, party_y_test).mean()
+        trained_models[party_code] = trained_model
 
-        train_test_results[party_code] = {
-            "rmse_score": rmse_score,
-            "trained_model": trained_model
-        }
+        #TODO Reintroduce model evaluation logic for RMSE
+        # # Handle model evaluation
+        # rmse_score = xgb_regressor.evaluate_model(trained_model, X_test, party_y_test).mean()
 
-    #Handle prediction (ensure input features are transform via preprocessor instance)
+        # train_test_results[party_code] = {
+        #     "rmse_score": rmse_score,
+        #     "trained_model": trained_model
+        # }
+
+    #Handle prediction (ensure input features are transformed via preprocessor instance)
     predict_features = []
     X_predict = np.array(
         preprocessor_pipeline.transform(predict_features)
