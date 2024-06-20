@@ -64,6 +64,20 @@ class NationalResults(BaseData):
     def clean_data(self):
         pass
 
+# Handle national polls and results combined data
+class NationalPollsResultsCombined(BaseData):
+    """
+    Fetch and clean national polls and results combined data.
+    """
+    def __init__(self):
+        self.data_source = ""
+
+    def fetch_data(self):
+        pass
+
+    def clean_data(self):
+        pass
+
 # Handle national Google Trends data
 class NationalGoogleTrends(BaseData):
     """
