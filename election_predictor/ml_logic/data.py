@@ -6,6 +6,7 @@ from google.cloud import bigquery
 from colorama import Fore, Style
 
 from election_predictor.params import *
+from election_predictor.ml_logic.utils.data_utils import get_data
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 from google.oauth2 import service_account
 
@@ -42,10 +43,11 @@ class NationalPolls(BaseData):
     Fetch and clean national polls data.
     """
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_polls"]["query"]
 
     def fetch_data(self):
-        pass
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
@@ -56,10 +58,11 @@ class NationalResults(BaseData):
     Fetch and clean national election results data.
     """
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_results"]["query"]
 
     def fetch_data(self):
-        pass
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
@@ -70,10 +73,41 @@ class NationalPollsResultsCombined(BaseData):
     Fetch and clean national polls and results combined data.
     """
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_polls_results_combined"]["query"]
 
     def fetch_data(self):
+        return get_data(self.gcp_project_id, self.data_source)
+
+    def clean_data(self):
         pass
+
+# Handle constituency results data
+class ConstituencyResults(BaseData):
+    """
+    Fetch and clean constituency results data.
+    """
+    def __init__(self):
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["constituency_results"]["query"]
+
+    def fetch_data(self):
+        return get_data(self.gcp_project_id, self.data_source)
+
+    def clean_data(self):
+        pass
+
+# Handle constituency bias data
+class ConstituencyBias(BaseData):
+    """
+    Fetch and clean constituency bias data.
+    """
+    def __init__(self):
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["constituency_bias"]["query"]
+
+    def fetch_data(self):
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
@@ -84,24 +118,18 @@ class NationalGoogleTrends(BaseData):
     Fetch and clean national Google Trends data.
     """
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_google_trends"]["query"]
 
     def fetch_data(self):
-        pass
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
 
 # Handle national Wikipedia data
 class NationalWikipedia(BaseData):
-    def __init__(self):
-        self.data_source = ""
-
-    def fetch_data(self):
-        pass
-
-    def clean_data(self):
-        pass
+    pass
 
 # Handle ONS economic data
 class ONSEconomic(BaseData):

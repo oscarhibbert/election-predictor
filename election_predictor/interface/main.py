@@ -105,10 +105,10 @@ def predict_election() -> dict:
     election_date = datetime.strptime(election_date["date"], "%Y-%m-%d")
 
     #TODO Seperate poll window and days from today until election into seperate vars
-    cutoff_date = election_date - timedelta(days=54)
+    cutoff_date = election_date - timedelta(days=45)
 
     last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
-    prediction_date = election_date - timedelta(days=24)
+    prediction_date = election_date - timedelta(days=15)
 
     # Handle train and test data splitting
     train_data = polls_results_trends_ons[
