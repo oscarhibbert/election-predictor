@@ -1,11 +1,10 @@
 import pandas as pd
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from election_predictor.interface.main.py import predict_election
+from election_predictor.interface.main import predict_election
 
-# Instantiating FastAPI and
+# Instantiating FastAPI
 app = FastAPI()
-app.state.model = predict_election()
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -17,14 +16,14 @@ app.add_middleware(
 )
 
 # Creating endpoint for predicting national vote share
-@app.get("/predict_vote_share")
-def predict_vote_share():
+# Returns a dictionary containing the predicted general
+# election vote share and projected seats.
+@app.get("/predict")
+def predict():
     prediction = predict_election()
-    return prediction
+    return {"results": prediction}
 
-
-
+# Define root endpoint
 @app.get("/")
 def root():
-    return {'introduction': 'Welcome to our API, please use our endpoints\
-            to get national vote share or constituency results.'}
+    return {'introduction': 'Welcome to our API, please use our endpoints to get national vote share or constituency results.'}
