@@ -238,8 +238,8 @@ def predict_election() -> dict:
 
         predicted_vote_share = trained_model.predict(X_predict_matrix).mean()
 
-        election_predictions[party_code] = predicted_vote_share
+        election_predictions[party_code] = predicted_vote_share.item()
 
     return election_predictions
 
-predict_election()
+# predict_election()

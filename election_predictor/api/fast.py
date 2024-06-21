@@ -17,11 +17,11 @@ app.add_middleware(
 
 # Creating endpoint for predicting national vote share
 # Returns a dictionary containing the predicted general
-# election vote share and projected seats.
+# election vote share.
 @app.get("/predict")
 def predict():
     prediction = predict_election()
-    return {"results": prediction}
+    return prediction
 
 # Define root endpoint
 @app.get("/")
