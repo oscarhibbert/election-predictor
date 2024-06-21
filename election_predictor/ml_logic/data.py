@@ -129,15 +129,27 @@ class NationalGoogleTrends(BaseData):
 
 # Handle national Wikipedia data
 class NationalWikipedia(BaseData):
-    pass
+    """
+    Fetch and clean Wikipedia data
+    """
+    def __init__(self):
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_wikipedia"]["query"]
+
+    def fetch_data(self):
+        return get_data(self.gcp_project_id, self.data_source)
+
+    def clean_data(self):
+        pass
 
 # Handle ONS economic data
 class ONSEconomic(BaseData):
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["ons_economic_data"]["query"]
 
     def fetch_data(self):
-        pass
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
@@ -145,10 +157,11 @@ class ONSEconomic(BaseData):
 # Handle national Reddit data
 class NationalReddit(BaseData):
     def __init__(self):
-        self.data_source = ""
+        self.gcp_project_id = GCP_PROJECT_ID
+        self.data_source = DATA_RETRIEVAL["national_reddit"]["query"]
 
     def fetch_data(self):
-        pass
+        return get_data(self.gcp_project_id, self.data_source)
 
     def clean_data(self):
         pass
