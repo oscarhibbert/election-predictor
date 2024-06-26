@@ -143,11 +143,11 @@ class NationalResults(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -174,11 +174,11 @@ class ConstituencyResults(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -205,11 +205,11 @@ class ConstituencyBias(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -236,11 +236,11 @@ class NationalGoogleTrends(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -267,11 +267,11 @@ class NationalWikipedia(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -298,11 +298,11 @@ class ONSEconomic(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
@@ -329,11 +329,11 @@ class NationalReddit(DataHandler):
     """
     def __init__(
         self,
-        gcp_service_account_key,
-        gcp_project_id,
-        start_date,
-        end_date,
-        _data_source
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime,
+        _data_source: pd.DataFrame | dict
     ):
         super().__init__(
             gcp_service_account_key, gcp_project_id, start_date, end_date,
