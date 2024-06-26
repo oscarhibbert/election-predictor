@@ -12,6 +12,7 @@ scikit-learn
 google.cloud
 google-cloud-bigquery
 google-cloud-storage
+requests
 db-dtypes
 pyarrow
 colorama
