@@ -4,8 +4,6 @@ from google.oauth2 import service_account
 from colorama import Fore, Style
 import requests
 
-from election_predictor.params import *
-
 #TODO Add support for different types of API requests (e.g., POST, PUT, DELETE)
 def api_utility(url: str, params: dict) -> dict:
     """
@@ -29,7 +27,6 @@ def api_utility(url: str, params: dict) -> dict:
 
         # Handle HTTPError for bad responses (4XX or 5XX)
         response.raise_for_status()
-
 
         data = response.json()
 

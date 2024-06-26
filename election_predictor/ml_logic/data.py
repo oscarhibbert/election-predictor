@@ -1,36 +1,45 @@
 # Imports
+from typing import Literal
 from abc import ABC, abstractmethod
 import pandas as pd
 from  datetime import datetime
-from google.cloud import bigquery
 from colorama import Fore, Style
 
 from election_predictor.params import *
-from election_predictor.ml_logic.utils.data_utils import get_data
+from election_predictor.ml_logic.utils.data_utils import gcp_bq_utility, api_utility
 from election_predictor.ml_logic.utils.election_utils import find_next_election_date
 from google.oauth2 import service_account
 
 # Blueprint for all data functions using abstract base class
 class DataHandler(ABC):
     """
-    Abstract Base Class for all data functions. Defines the interface that all data functions must implement.
+    Abstract Base Class for all data functions. Defines the interface that\
+    all data functions must implement.
     """
 
     @abstractmethod
-    def __init__(self, start_date: datetime, end_date: datetime):
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        data_source_start_date: datetime,
+        data_source_end_date: datetime
+    ):
         """
         Initialize the data handler with the specified start and end dates.
         """
-        self.start_date = start_date
-        self.end_date = end_date
+        self.gcp_service_account_key = gcp_service_account_key
+        self.gcp_project_id = gcp_project_id
+        self.data_source_start_date = data_source_start_date
+        self.data_source_end_date = data_source_end_date
         self._data_source = None
 
     @abstractmethod
-    def get_data(self, *args, **kwargs) -> pd.DataFrame:
+    def get_data_source(self, *args, **kwargs) -> pd.DataFrame | dict:
         """
-        Fetch data from the specified source and return it as a DataFrame.
+        Get data from the specified source and return it as a DataFrame.
 
-        :return: A DataFrame containing the fetched and cleaned data.
+        :return: A DataFrame or dictionary containing the data source.
 
         :example:
         >>> get_data()
@@ -49,20 +58,48 @@ class DataHandler(ABC):
         """
         pass
 
+    @abstractmethod
+    def fetch_cleaned_data_source(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        Fetch the cleaned data source.
+
+        :return: A DataFrame containing the fetched and cleaned data.
+
+        :example:
+        >>> fetch_cleaned_data()
+        """
+        pass
+
 # Handle national polls data
-class NationalPolls(BaseData):
+class NationalPolls(DataHandler):
     """
     Fetch and clean national polls data.
     """
-    def __init__(self):
-        self.gcp_project_id = GCP_PROJECT_ID
-        self.data_source = DATA_RETRIEVAL["national_polls"]["query"]
+    def __init__(
+        self,
+        gcp_service_account_key,
+        gcp_project_id,
+        start_date,
+        end_date,
+        _data_source
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date,
+            _data_source
+        )
 
-    def fetch_data(self):
-        return get_data(self.gcp_project_id, self.data_source)
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
+            DATA_RETRIEVAL["national_polls"]["query"]
+        )
 
     def clean_data(self):
         pass
+
+    def fetch_clean_data_source(self):
+        return self._data_source
 
 # Handle national election results data
 class NationalResults(BaseData):
