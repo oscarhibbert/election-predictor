@@ -260,7 +260,6 @@ class NationalGoogleTrends(DataHandler):
     def fetch_clean_data_source(self):
         return self._data_source
 
-
 # Handle national Wikipedia data
 class NationalWikipedia(DataHandler):
     """
@@ -354,10 +353,9 @@ class NationalReddit(DataHandler):
     def fetch_clean_data_source(self):
         return self._data_source
 
-#TODO Complete factory function
 # Factory function handles data retrieval
 def data_factory(
-    data_source: str | list, start_date: datetime, end_date: datetime
+    data_sources: str | list, start_date: datetime, end_date: datetime
 ) -> DataHandler:
         """
         Factory function that returns the specified data source class.
@@ -365,37 +363,46 @@ def data_factory(
         :param data_source: The data source class or classes to be returned.
         :param start_date: The start date of the data source(s).
         :param end_date: The end date of the data source(s).
-        :return: The specified data source class(es).
+        :return: A dictionary of the specified data source class(es).
 
         :example:
         >>> data_factory("national_polls")
         >>> data_factory(["national_polls", "national_results"])
         """
-        if data_source == "national_polls":
-            return NationalPolls()
 
-        if data_source == "national_results":
-            return NationalResults()
+        # Handle edge case for a single data source
+        if isinstance(data_sources, str):
+            data_source = [data_sources]
 
-        if data_source == "national_polls_results_combined":
-            return NationalPollsResultsCombined()
+        # Map data source class names in a dictionary
+        data_source_classes_map = {
+            "national_polls_results_combined": NationalPollsResultsCombined,
+            "national_polls": NationalPolls,
+            "national_results": NationalResults,
+            "constituency_results": ConstituencyResults,
+            "constituency_bias": ConstituencyBias,
+            "national_google_trends": NationalGoogleTrends,
+            "national_wikipedia": NationalWikipedia,
+            "ons_economic_data": ONSEconomic,
+            "national_reddit": NationalReddit
+        }
 
-        if data_source == "constituency_results":
-            return ConstituencyResults()
+        gcp_service_account_key = "path/to/service/account/key.json"
+        gcp_project_id = "your-gcp-project-id"
 
-        if data_source == "constituency_bias":
-            return ConstituencyBias()
+        data_source_classes = { }
 
-        if data_source == "national_google_trends":
-            return NationalGoogleTrends()
-
-        if data_source == "national_wikipedia":
-            return NationalWikipedia()
-
-        if data_source == "ons_economic_data":
-            return ONSEconomic()
-
-        if data_source == "national_reddit":
-            return NationalReddit()
-
-        raise ValueError(f"A specified data source does not exist. Check parameter and try again.")
+        # Handle instantiation of data source specified classes only
+        for data_source in data_source:
+            if data_source in data_source_classes_map:
+                data_source_classes[data_source] = \
+                    data_source_classes_map[data_source](
+                        gcp_service_account_key,
+                        gcp_project_id,
+                        start_date,
+                        end_date
+                    )
+        else:
+            raise ValueError(
+                f"The data source '{data_source}' does not exist.\
+                    Check the parameter and try again.")
