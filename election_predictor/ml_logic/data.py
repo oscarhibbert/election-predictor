@@ -38,7 +38,8 @@ class DataHandler(ABC):
         self.gcp_project_id = gcp_project_id
         self.data_source_start_date = data_source_start_date
         self.data_source_end_date = data_source_end_date
-        self._data_source = None
+
+        self._data_source = dict | pd.DataFrame
 
     @abstractmethod
     def get_data_source(self, *args, **kwargs) -> pd.DataFrame | dict:
@@ -84,12 +85,10 @@ class NationalPollsResultsCombined(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -102,7 +101,7 @@ class NationalPollsResultsCombined(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle national polls data
@@ -115,12 +114,10 @@ class NationalPolls(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -133,7 +130,7 @@ class NationalPolls(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle national election results data
@@ -146,12 +143,10 @@ class NationalResults(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -164,7 +159,7 @@ class NationalResults(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle constituency results data
@@ -177,12 +172,10 @@ class ConstituencyResults(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -195,7 +188,7 @@ class ConstituencyResults(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle constituency bias data
@@ -208,12 +201,10 @@ class ConstituencyBias(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -226,7 +217,7 @@ class ConstituencyBias(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle national Google Trends data
@@ -239,12 +230,10 @@ class NationalGoogleTrends(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -257,7 +246,7 @@ class NationalGoogleTrends(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle national Wikipedia data
@@ -270,12 +259,10 @@ class NationalWikipedia(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -288,7 +275,7 @@ class NationalWikipedia(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle ONS economic data
@@ -301,12 +288,10 @@ class ONSEconomic(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -319,7 +304,7 @@ class ONSEconomic(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Handle national Reddit data
@@ -332,12 +317,10 @@ class NationalReddit(DataHandler):
         gcp_service_account_key: str,
         gcp_project_id: str,
         start_date: datetime,
-        end_date: datetime,
-        _data_source: pd.DataFrame | dict
+        end_date: datetime
     ):
         super().__init__(
-            gcp_service_account_key, gcp_project_id, start_date, end_date,
-            _data_source
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
     def get_data_source(self):
@@ -350,7 +333,7 @@ class NationalReddit(DataHandler):
     def clean_data(self):
         pass
 
-    def fetch_clean_data_source(self):
+    def fetch_cleaned_data_source(self):
         return self._data_source
 
 # Factory function handles data retrieval
@@ -372,7 +355,7 @@ def data_factory(
 
         # Handle edge case for a single data source
         if isinstance(data_sources, str):
-            data_source = [data_sources]
+            data_sources = [data_sources]
 
         # Map data source class names in a dictionary
         data_source_classes_map = {
@@ -393,7 +376,7 @@ def data_factory(
         data_source_classes = { }
 
         # Handle instantiation of data source specified classes only
-        for data_source in data_source:
+        for data_source in data_sources:
             if data_source in data_source_classes_map:
                 data_source_classes[data_source] = \
                     data_source_classes_map[data_source](
@@ -402,6 +385,7 @@ def data_factory(
                         start_date,
                         end_date
                     )
+
         else:
             raise ValueError(
                 f"The data source '{data_source}' does not exist.\
