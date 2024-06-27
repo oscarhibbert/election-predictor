@@ -14,6 +14,24 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
+def fetch_data():
+    pass
+
+def clean_data():
+    pass
+
+def preprocess_data():
+    pass
+
+def train_models():
+    pass
+
+def evaluate_models():
+    pass
+
+def predict():
+    pass
+
 def predict_election() -> dict:
     """
     Predicts the outcome of the 2024 UK general election.
