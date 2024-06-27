@@ -7,8 +7,6 @@ from colorama import Fore, Style
 
 from election_predictor.params import *
 from election_predictor.ml_logic.utils.data_utils import gcp_bq_utility, api_utility
-from election_predictor.ml_logic.utils.election_utils import find_next_election_date
-from google.oauth2 import service_account
 
 # Blueprint for all data functions using abstract base class
 class DataHandler(ABC):

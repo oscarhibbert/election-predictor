@@ -38,11 +38,11 @@ def predict_election() -> dict:
     # Fetch actual data via data source classes
     clean_data_sources = { }
 
-    for data_source_name, data_source_class in data_source_classes.values():
-        data_source_class.fetch_data()
+    for data_source_name, data_source_class in data_source_classes.items():
+        data_source_class.get_data_source()
         data_source_class.clean_data()
         clean_data_sources[data_source_name] = \
-            data_source_class.fetch_clean_data_source()
+            data_source_class.fetch_cleaned_data_source()
 
     national_polls_results_combined, constituency_bias, national_google_trends, \
     ons_economic_data = clean_data_sources.values()
