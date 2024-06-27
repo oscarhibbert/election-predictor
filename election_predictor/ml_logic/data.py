@@ -338,14 +338,17 @@ class NationalReddit(DataHandler):
 
 # Factory function handles data retrieval
 def data_factory(
-    data_sources: str | list, start_date: datetime, end_date: datetime
-) -> DataHandler:
+    data_sources: str | list, start_date: datetime, end_date: datetime,
+    gcp_project_id: str, gcp_service_key: str
+) -> dict:
         """
         Factory function that returns the specified data source class.
 
         :param data_source: The data source class or classes to be returned.
         :param start_date: The start date of the data source(s).
         :param end_date: The end date of the data source(s).
+        :param gcp_project_id: The Google Cloud Platform project ID.
+        :param gcp_service_key: The Google Cloud Platform service account key.
         :return: A dictionary of the specified data source class(es).
 
         :example:
@@ -370,23 +373,25 @@ def data_factory(
             "national_reddit": NationalReddit
         }
 
-        gcp_service_account_key = "path/to/service/account/key.json"
-        gcp_project_id = "your-gcp-project-id"
+        gcp_project_id = gcp_project_id
+        gcp_service_account_key = gcp_service_key
 
         data_source_classes = { }
 
         # Handle instantiation of data source specified classes only
         for data_source in data_sources:
             if data_source in data_source_classes_map:
-                data_source_classes[data_source] = \
-                    data_source_classes_map[data_source](
-                        gcp_service_account_key,
-                        gcp_project_id,
-                        start_date,
-                        end_date
-                    )
+                data_source_classes[data_source] = data_source_classes_map[data_source](
+                    gcp_service_account_key,
+                    gcp_project_id,
+                    start_date,
+                    end_date
+                )
 
-        else:
-            raise ValueError(
-                f"The data source '{data_source}' does not exist.\
-                    Check the parameter and try again.")
+            else:
+                raise ValueError(
+                    f"The data source '{data_source}' does not exist. "
+                    "Check the parameter and try again."
+                )
+
+        return data_source_classes

@@ -31,7 +31,8 @@ def predict_election() -> dict:
     # Fetch specified data source classes from data.py
     data_source_classes = \
         data_factory(data_sources, data_sources_start_date,
-            data_sources_end_date
+            data_sources_end_date, GCP_PROJECT_ID,
+            GCP_SERVICE_ACCOUNT_KEY
         )
 
     # Fetch actual data via data source classes
