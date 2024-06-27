@@ -14,29 +14,13 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
-def fetch_data():
-    pass
-
-def clean_data():
-    pass
-
-def preprocess_data():
-    pass
-
-def train_models():
-    pass
-
-def evaluate_models():
-    pass
-
-def predict():
-    pass
-
-def predict_election() -> dict:
+def fetch_data() -> dict:
     """
-    Predicts the outcome of the 2024 UK general election.
+    Fetches data for specified data sources, should be used in the predict
+    election function.
 
-    :return: A dictionary containing the predicted general election vote share and projected seats.
+    :return: A dictionary containing national polls and results combined,
+    constituency bias, national google trends and ONS economic data.
     """
     # Handle data source fetching and cleaning
     data_sources_start_date = DATA_SOURCES_START_DATE
@@ -62,8 +46,22 @@ def predict_election() -> dict:
         clean_data_sources[data_source_name] = \
             data_source_class.fetch_cleaned_data_source()
 
-    national_polls_results_combined, constituency_bias, national_google_trends, \
-    ons_economic_data = clean_data_sources.values()
+    return clean_data_sources
+
+
+def clean_data(data_sources: dict) -> pd.DataFrame:
+    """
+    Cleans the fetched data sources. Should be used in the predict election
+    function.
+
+    :param: data_sources: A dictionary containing the data sources from
+    fetch_data.
+
+    :return: A DataFrame combining cleaned polls, results,
+    trends and ONS data – ready for preprocessing.
+    """
+    national_polls_results_combined, constituency_bias, \
+    national_google_trends, ons_economic_data = data_sources.values()
 
     # Handle polls and results combined cleaning
     national_polls_results_combined['enddate'] = \
@@ -107,6 +105,27 @@ def predict_election() -> dict:
             left_on='enddate_year_month',
             right_on='Month'
         )
+
+    return polls_results_trends_ons
+
+def preprocess_data():
+    pass
+
+def train_models():
+    pass
+
+def evaluate_models():
+    pass
+
+def predict():
+    pass
+
+def predict_election() -> dict:
+    """
+    Predicts the outcome of the 2024 UK general election.
+
+    :return: A dictionary containing the predicted general election vote share and projected seats.
+    """
 
     # Handle manual scaling for trends columns
     for column in ['LAB_trends', 'CON_trends', 'LIB_trends',
