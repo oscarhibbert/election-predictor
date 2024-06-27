@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+from colorama import Fore, Style
 
 # Import params
 from election_predictor.params import *
@@ -23,6 +24,8 @@ def fetch_data() -> dict:
     :return: A dictionary containing national polls and results combined,
     constituency bias, national google trends and ONS economic data.
     """
+    print(Fore.GREEN + "\nFetching data..." + Style.RESET_ALL)
+
     # Handle data source fetching and cleaning
     data_sources_start_date = DATA_SOURCES_START_DATE
     data_sources_end_date = DATA_SOURCES_END_DATE
@@ -47,6 +50,8 @@ def fetch_data() -> dict:
         clean_data_sources[data_source_name] = \
             data_source_class.fetch_cleaned_data_source()
 
+    print(Fore.GREEN + "\n✅ Data Fetching Complete" + Style.RESET_ALL)
+
     return clean_data_sources
 
 def clean_data(data_sources: dict) -> pd.DataFrame:
@@ -60,6 +65,8 @@ def clean_data(data_sources: dict) -> pd.DataFrame:
     :return: A DataFrame combining cleaned polls, results,
     trends and ONS data – ready for preprocessing.
     """
+    print(Fore.GREEN + "\nCleaning data..." + Style.RESET_ALL)
+
     national_polls_results_combined, constituency_bias, \
     national_google_trends, ons_economic_data = data_sources.values()
 
@@ -106,6 +113,8 @@ def clean_data(data_sources: dict) -> pd.DataFrame:
             right_on='Month'
         )
 
+    print(Fore.GREEN + "\n✅ Data Cleaning Complete" + Style.RESET_ALL)
+
     return polls_results_trends_ons
 
 def preprocess_data(cleaned_data: pd.DataFrame) -> dict:
@@ -119,6 +128,8 @@ def preprocess_data(cleaned_data: pd.DataFrame) -> dict:
     :return: A dictionary containing X and y train and test data in a dictionary
     ready for model training and evaluation.
     """
+    print(Fore.GREEN + "\nPreprocessing data..." + Style.RESET_ALL)
+
     # Handle manual scaling for trends columns
     for column in ['LAB_trends', 'CON_trends', 'LIB_trends',
        'GRE_trends', 'BRX_trends', 'PLC_trends', 'SNP_trends', 'UKI_trends',
@@ -213,6 +224,8 @@ def preprocess_data(cleaned_data: pd.DataFrame) -> dict:
     X_train.drop(columns=['Month_x'], inplace=True)
     X_test.drop(columns=['Month_x'], inplace=True)
 
+    print(Fore.GREEN + "\n✅ Data Preprocessing Complete" + Style.RESET_ALL)
+
     return {
         "X_train": X_train,
         "X_test": X_test,
@@ -231,6 +244,8 @@ def train_models(X_train: pd.DataFrame, y_train: pd.DataFrame) -> dict:
     :return: A dictionary containing the trained models for each
     party.
     """
+    print(Fore.GREEN + "\nTraining models..." + Style.RESET_ALL)
+
     # Handle matrix conversion for train feature data
     X_train_matrix = np.array(X_train)
 
@@ -261,6 +276,8 @@ def train_models(X_train: pd.DataFrame, y_train: pd.DataFrame) -> dict:
 
         trained_models[party_code] = trained_model
 
+    print(Fore.GREEN + "\n✅ Model Training Complete" + Style.RESET_ALL)
+
     return trained_models
 
 #TODO Introduce model evaluation scoring and previous election delta
@@ -288,6 +305,8 @@ def predict(trained_models: dict, X_predict: pd.DataFrame) -> dict:
     :return: A dictionary containing the predicted general election vote
     share and projected seats.
     """
+    print(Fore.GREEN + "\nRunning prediction..." + Style.RESET_ALL)
+
     #Handle prediction (ensure input features are transformed via preprocessor instance)
     X_predict_matrix = np.array(X_predict)
 
@@ -300,6 +319,8 @@ def predict(trained_models: dict, X_predict: pd.DataFrame) -> dict:
 
         election_predictions[party_code] = predicted_vote_share
 
+    print(Fore.GREEN + "\n✅ Prediction Complete" + Style.RESET_ALL)
+
     return election_predictions
 
 def predict_election() -> dict:
@@ -310,5 +331,24 @@ def predict_election() -> dict:
     share and projected seats.
     """
 
+    data_sources = fetch_data()
+
+    cleaned_data = clean_data(data_sources)
+
+    preprocessed_data = preprocess_data(cleaned_data)
+
+    X_train, y_train, X_test, y_test = \
+        preprocessed_data['X_train'], \
+        preprocessed_data['y_train'], \
+        preprocessed_data['X_test'], \
+        preprocessed_data['y_test']
+
+    trained_models = train_models(X_train, y_train)
+
+    prediction = predict(trained_models, X_test)
+
+    print(prediction)
+
+    return prediction
 
 predict_election()
