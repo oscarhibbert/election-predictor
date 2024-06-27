@@ -1,310 +1,395 @@
 # Imports
+from typing import Literal
+from abc import ABC, abstractmethod
 import pandas as pd
 from  datetime import datetime
-from google.cloud import bigquery
 from colorama import Fore, Style
 
 from election_predictor.params import *
-from election_predictor.ml_logic.utils.election_utils import find_next_election_date
-from google.oauth2 import service_account
+from election_predictor.ml_logic.utils.data_utils import gcp_bq_utility, api_utility
 
-#TODO Add ABS class blueprint for cleaning functions and combined cleaned / fetch functions
-
-#TODO Create data cleaning functions for each data source
-def clean_national_polls(national_polls_dataframe: pd.DataFrame) -> dict:
+# Blueprint for all data functions using abstract base class
+class DataHandler(ABC):
     """
-    Cleans the national polls Dataframe.
-
-    :param national_polls_dataframe: The national polls Dataframe.
-    :return: A dictionary containing cleaned polling data in DataFrames for each country.
+    Abstract Base Class for all data functions. Defines the interface that\
+    all data functions must implement.
     """
-    np_dataframe = national_polls_dataframe
 
-    # Handle spaces and ampersands in pollster names
-    np_dataframe['pollster'] = np_dataframe['pollster'].str.replace(' ', '').str.replace('&', '').str.replace('-', '')
+    @abstractmethod
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        data_source_start_date: datetime,
+        data_source_end_date: datetime
+    ):
+        """
+        Initialize the data handler with the specified start and end dates.
 
-    # Creates unique index for each poll
-    df_uuid = np_dataframe.set_index(np_dataframe['enddate'].dt.strftime('%Y-%m-%d').apply(str).str.replace('-', '_') + '_' + np_dataframe['pollster'])
+        :param gcp_service_account_key: The filepath to the JSON Google Cloud \
+            account key.
+        :param gcp_project_id: The Google Cloud Platform project ID.
+        :param data_source_start_date: The start date of the data source.
+        :param data_source_end_date: The end date of the data source.
+        """
+        self.gcp_service_account_key = gcp_service_account_key
+        self.gcp_project_id = gcp_project_id
+        self.data_source_start_date = data_source_start_date
+        self.data_source_end_date = data_source_end_date
 
-    # Pivots table to create column for each party
-    df = df_uuid.pivot_table(values="votingintention", index=[df_uuid.index,\
-                                                                        'startdate', 'enddate', 'pollster', 'samplesize', 'countrycode'], columns=['partycode'])
-    df.reset_index(level=['startdate', 'enddate', 'pollster', 'samplesize', 'countrycode'], inplace=True)
-    df.reset_index(drop=True, inplace=True)
+        self._data_source = dict | pd.DataFrame
 
-    # Filters to after January 1, 2004
-    df = df[df['enddate'] > '2004-01-01']
+    @abstractmethod
+    def get_data_source(self, *args, **kwargs) -> pd.DataFrame | dict:
+        """
+        Get data from the specified source and save it as a DataFrame or dictionary\
+        to the data source property.
 
-    # Removes pollsters with fewer than 10 polls
-    pollster_counts = df['pollster'].value_counts()
-    valid_pollsters = pollster_counts[pollster_counts >= 10].index
-    df = df[df['pollster'].isin(valid_pollsters)]
+        :example:
+        >>> get_data()
+        """
+        pass
 
-    # Adds rating column
-    df['pollster_rating'] = df['pollster'].map(POLLSTER_RATINGS)
+    @abstractmethod
+    def clean_data(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        Clean data saved into the data source property and overwrite the result\
+        into the data source property.
 
-    # Set election dates
-    election_dates = [
-        datetime.strptime(UK_ELECTIONS["2005"]["date"], "%Y-%m-%d"),
-        datetime.strptime(UK_ELECTIONS["2010"]["date"], "%Y-%m-%d"),
-        datetime.strptime(UK_ELECTIONS["2015"]["date"], "%Y-%m-%d"),
-        datetime.strptime(UK_ELECTIONS["2017"]["date"], "%Y-%m-%d"),
-        datetime.strptime(UK_ELECTIONS["2019"]["date"], "%Y-%m-%d"),
-        datetime.strptime(UK_ELECTIONS["2024"]["date"], "%Y-%m-%d")
-    ]
+        :example:
+        >>> clean_data()
+        """
+        pass
 
-    # Creates next election date column
-    df['next_election_date'] = df['startdate'].apply(lambda x: find_next_election_date(x, election_dates))
-    df['days_until_next_election'] = (df['next_election_date'] - df['startdate']).dt.days
+    @abstractmethod
+    def fetch_cleaned_data_source(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        Fetch the cleaned data source, returns a DataFrame.
 
-    # Creates subsets of polls
-    gb_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["great_britain"])] # 4622 polls
-    sco_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["scotland"])] # 213 polls
-    wal_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["wales"])] #91 polls
-    ukm_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["united_kingdom"])] #428 polls
+        :return: A DataFrame containing the fetched and cleaned data.
 
-    # Disregard polls:
-    nir_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["northern_ireland"])] # Inclined to disregard, only 1 polls
-    enw_polls = df[df['countrycode'].isin(UK_ELECTION_COUNTRY_CODES["england_wales"])] # Inclined to disregard, only 1 [poll]
+        :example:
+        >>> fetch_cleaned_data()
+        """
+        pass
 
-    # Defines relevant parties for each country
-    gb_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'NAT', 'OTH', 'PLC', 'SNP', 'UKI']
-    sco_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'OTH', 'SNP', 'OTH', 'UKI']
-    ukm_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'NAT', 'PLC', 'SNP', 'UKI']
-    wal_columns = ['startdate', 'enddate', 'pollster', 'samplesize', 'pollster_rating', 'next_election_date', 'days_until_next_election', 'BRX', 'CON', 'GRE', 'LAB', 'LIB', 'OTH', 'PLC', 'UKI']
-
-    # Filtered dataframe for GB polls with GB parties
-    gb_df = gb_polls[gb_columns]
-    # Filtered dataframe for Scotland polls with relevant parties
-    scotland_df = sco_polls[sco_columns]
-    # Filtered dataframe for Wales polls with relevant parties
-    wales_df = wal_polls[wal_columns]
-    # Filtered dataframe for UK polls with UK parties
-    uk_df = ukm_polls[ukm_columns]
-
-    # Return a DataFrame containing polls for each country
-    return {
-        "great_britain": {
-            "polls_dataframe": gb_df,
-            "election_code": "GBR"
-        },
-        "scotland": {
-            "polls_dataframe": scotland_df,
-            "election_code": "SCO"
-        },
-        "wales": {
-            "polls_dataframe": wales_df,
-            "election_code": "WAL"
-        },
-        "united_kingdom": {
-            "polls_dataframe": uk_df,
-            "election_code": "UKM"
-        }
-    }
-
-# Not built as no requirement for continued results cleaning
-def clean_national_results(national_results_dataframe) -> dict:
-    pass
-
-# Not built as no requirement for continued results cleaning
-def clean_constituency_results():
-    pass
-
-def clean_national_google_trends(google_trends_dataframe: pd.DataFrame) -> pd.DataFrame:
+# Handle national polls and results combined data
+class NationalPollsResultsCombined(DataHandler):
     """
-    Cleans Google Trends Dataframe.
-
-    :param good_trends_dataframe: The Google Trends DataFrame.
-    :return: A DataFrame containing the cleaned Google Trends data.
+    Fetch and clean national polls and results combined data.
     """
-    # Ensure DataFrame has only one Labour Party column and months are in datetime format
-
-    # Set DataFrame
-    df = google_trends_dataframe
-
-    # Handle <1 values
-    df.replace('<1', 0.5,inplace=True)
-
-    # Handle datatypes
-    df = df.astype(
-        {'Green Party: (United Kingdom)':'int','Reform UK: (United Kingdom)':'int',\
-        'Plaid Cymru: (United Kingdom)':'int','Scottish National Party: (United Kingdom)':'int',\
-            'UK Independence Party: (United Kingdom)':'int','British National Party: (United Kingdom)':'int'})
-
-    # Handle column naming conventions
-    df.rename(columns={
-        'Labour Party: (United Kingdom)': 'LAB_trends',
-        'Conservative Party: (United Kingdom)': 'CON_trends',
-        'Liberal Democrats: (United Kingdom)': 'LIB_trends',
-        'Green Party: (United Kingdom)': 'GRE_trends',
-        'Reform UK: (United Kingdom)': 'BRX_trends',
-        'Plaid Cymru: (United Kingdom)': 'PLC_trends',
-        'Scottish National Party: (United Kingdom)': 'SNP_trends',
-        'UK Independence Party: (United Kingdom)': 'UKI_trends',
-        'British National Party: (United Kingdom)': 'NAT_trends'},
-        inplace=True
-    )
-
-    return df
-
-def clean_national_wikipedia(wikipedia_dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-    Cleans Wikipedia data.
-
-    :param wikipedia_dataframe: The Google Trends DataFrame.
-    :return: A DataFrame containing the cleaned Wikipedia data.
-    """
-    # Handle datatime formatting
-    wikipedia_dataframe['date'] = wikipedia_dataframe.to_datetime(wikipedia_dataframe['date'], format='%Y%m%d')
-
-    return wikipedia_dataframe
-
-#TODO Finish cleaning function for ONS economic data once confirmed by NS
-def clean_ons_economic_data(ons_economic_dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-    Cleans ONS economic data.
-
-    :param ons_economic_dataframe: The ONS economic DataFrame.
-    :return: A DataFrame containing the cleaned ONS economic data.
-    """
-    pass
-
-#TODO Create clean function for Reddit data once built by CK
-def clean_national_reddit():
-    pass
-
-#TODO Get data should cache data locally to prevent repeated data loading
-def get_data(gcp_project:str,query:str,) -> pd.DataFrame:
-    """
-    Load data from Google BigQuery and return as a dataframe.
-    """
-    credentials = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_KEY)
-
-    print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
-
-    client = bigquery.Client(project=gcp_project, credentials=credentials)
-    query_job = client.query(query)
-    result = query_job.result()
-    df = result.to_dataframe()
-
-    print(f"✅ Data loaded, with shape {df.shape}")
-
-    return df
-
-# Create master fetch and clean function
-def fetch_clean_data(data_source: str | list) -> list:
-    """
-    Selects the specified data sources, cleans and returns them as DataFrames.
-
-    :param data_source: The data sources to be fetched and cleaned.
-    :type data_source: str or list
-    :return: A dictionary containing cleaned DataFrames for respective data sources.
-
-    :example:
-    >>> fetch_clean_data("national_polls")
-
-    OR
-
-    >>> fetch_clean_data(["national_polls", "national_results"])
-    """
-    # Set data sources from params
-    data_sources = list(DATA_RETRIEVAL.keys())
-
-    # Set an empty dictionary to store data
-    data = { }
-
-    # Handle empty parameter
-    if data_source is None:
-        raise ValueError("No data source specified. Please specify a data source.")
-
-    # Handle invalid parameter dtype. Must be either a string or a list
-    if not isinstance(data_source, (str, list)):
-        raise ValueError("Invalid parameter type. Please specify a str or list.")
-
-    # # Handle invalid data source
-    # if data_source not in data_sources:
-    #     raise ValueError("Invalid data source. Please specify a valid data source.")
-
-    # Handle national polls
-    if "national_polls" in data_source:
-        national_polls = get_data(
-            GCP_PROJECT_ID,
-            DATA_RETRIEVAL["national_polls"]["query"]
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
-        # national_polls source is cleaned and does not require cleaning logic
-        data["national_polls"] = national_polls
-
-    if "national_results" in data_source:
-        national_results = get_data(
-            GCP_PROJECT_ID,
-            DATA_RETRIEVAL["national_results"]["query"]
-        )
-
-        # national_results is cleaned and does not require cleaning logic
-        data["national_results"] = national_results
-
-    if "national_polls_results_combined" in data_source:
-        national_polls_results_combined = get_data(
-            GCP_PROJECT_ID,
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["national_polls_results_combined"]["query"]
         )
 
-        # national_polls_results_combined is cleaned and does not require cleaning logic
-        data["national_polls_results_combined"] = national_polls_results_combined
+    def clean_data(self):
+        pass
 
-    if "constituency_results" in data_source:
-        constituency_results = get_data(
-            GCP_PROJECT_ID,
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle national polls data
+class NationalPolls(DataHandler):
+    """
+    Fetch and clean national polls data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
+            DATA_RETRIEVAL["national_polls"]["query"]
+        )
+
+    def clean_data(self):
+        pass
+
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle national election results data
+class NationalResults(DataHandler):
+    """
+    Fetch and clean national results data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
+            DATA_RETRIEVAL["national_results"]["query"]
+        )
+
+    def clean_data(self):
+        pass
+
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle constituency results data
+class ConstituencyResults(DataHandler):
+    """
+    Fetch and clean constituency results data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["constituency_results"]["query"]
         )
 
-        data["constituency_results"] = clean_constituency_results(constituency_results)
+    def clean_data(self):
+        pass
 
-    if "constituency_bias" in data_source:
-        constituency_bias = get_data(
-            GCP_PROJECT_ID,
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle constituency bias data
+class ConstituencyBias(DataHandler):
+    """
+    Fetch and clean constituency bias data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["constituency_bias"]["query"]
         )
 
-        # constituency_bias is cleaned and does not require cleaning logic
-        data["constituency_bias"] = constituency_bias
+    def clean_data(self):
+        pass
 
-    if "national_google_trends" in data_source:
-        national_google_trends = get_data(
-            GCP_PROJECT_ID,
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle national Google Trends data
+class NationalGoogleTrends(DataHandler):
+    """
+    Fetch and clean Google Trends data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["national_google_trends"]["query"]
         )
 
-        # national_google_trends is cleaned and does not require cleaning logic
-        data["national_google_trends"] = national_google_trends
+    def clean_data(self):
+        pass
 
-    if "national_wikipedia" in data_source:
-        national_wikipedia = get_data(
-            GCP_PROJECT_ID,
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle national Wikipedia data
+class NationalWikipedia(DataHandler):
+    """
+    Fetch and clean Wikipedia data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["national_wikipedia"]["query"]
         )
 
-        national_wikipedia_cleaned = clean_national_wikipedia(national_wikipedia)
+    def clean_data(self):
+        pass
 
-        data["national_wikipedia"] = national_wikipedia_cleaned
+    def fetch_cleaned_data_source(self):
+        return self._data_source
 
-    if "national_reddit" in data_source:
-        national_reddit = get_data(
-            GCP_PROJECT_ID,
-            DATA_RETRIEVAL["national_reddit"]["query"]
+# Handle ONS economic data
+class ONSEconomic(DataHandler):
+    """
+    Fetch and clean ONS economic data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
         )
 
-        # national_reddit is cleaned and does not require cleaning logic
-        data["national_reddit"] = national_reddit
-
-    if "ons_economic_data" in data_source:
-        ons_economic_data = get_data(
-            GCP_PROJECT_ID,
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
             DATA_RETRIEVAL["ons_economic_data"]["query"]
         )
 
-        # ons_economic_data is cleaned and does not require cleaning logic
-        data["ons_economic_data"] = ons_economic_data
+    def clean_data(self):
+        pass
 
-    return data
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Handle national Reddit data
+class NationalReddit(DataHandler):
+    """
+    Fetch and clean Reddit data.
+    """
+    def __init__(
+        self,
+        gcp_service_account_key: str,
+        gcp_project_id: str,
+        start_date: datetime,
+        end_date: datetime
+    ):
+        super().__init__(
+            gcp_service_account_key, gcp_project_id, start_date, end_date
+        )
+
+    def get_data_source(self):
+        self._data_source = gcp_bq_utility(
+            self.gcp_service_account_key,
+            self.gcp_project_id,
+            DATA_RETRIEVAL["national_reddit"]["query"]
+        )
+
+    def clean_data(self):
+        pass
+
+    def fetch_cleaned_data_source(self):
+        return self._data_source
+
+# Factory function handles data retrieval
+def data_factory(
+    data_sources: str | list, start_date: datetime, end_date: datetime,
+    gcp_project_id: str, gcp_service_key: str
+) -> dict:
+        """
+        Factory function that returns the specified data source class.
+
+        :param data_source: The data source class or classes to be returned.
+        :param start_date: The start date of the data source(s).
+        :param end_date: The end date of the data source(s).
+        :param gcp_project_id: The Google Cloud Platform project ID.
+        :param gcp_service_key: The Google Cloud Platform service account key.
+        :return: A dictionary of the specified data source class(es).
+
+        :example:
+        >>> data_factory("national_polls")
+        >>> data_factory(["national_polls", "national_results"])
+        """
+
+        # Handle edge case for a single data source
+        if isinstance(data_sources, str):
+            data_sources = [data_sources]
+
+        # Map data source class names in a dictionary
+        data_source_classes_map = {
+            "national_polls_results_combined": NationalPollsResultsCombined,
+            "national_polls": NationalPolls,
+            "national_results": NationalResults,
+            "constituency_results": ConstituencyResults,
+            "constituency_bias": ConstituencyBias,
+            "national_google_trends": NationalGoogleTrends,
+            "national_wikipedia": NationalWikipedia,
+            "ons_economic_data": ONSEconomic,
+            "national_reddit": NationalReddit
+        }
+
+        gcp_project_id = gcp_project_id
+        gcp_service_account_key = gcp_service_key
+
+        data_source_classes = { }
+
+        # Handle instantiation of data source specified classes only
+        for data_source in data_sources:
+            if data_source in data_source_classes_map:
+                data_source_classes[data_source] = data_source_classes_map[data_source](
+                    gcp_service_account_key,
+                    gcp_project_id,
+                    start_date,
+                    end_date
+                )
+
+            else:
+                raise ValueError(
+                    f"The data source '{data_source}' does not exist. "
+                    "Check the parameter and try again."
+                )
+
+        return data_source_classes

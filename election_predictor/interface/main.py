@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from election_predictor.params import *
 
 # Import all functions inside data.py from ml_logic
-from election_predictor.ml_logic.data import fetch_clean_data
+from election_predictor.ml_logic.data import data_factory
 
 # Import preprocessor
 from election_predictor.ml_logic.preprocessor import preprocessor
@@ -20,33 +20,29 @@ def predict_election() -> dict:
 
     :return: A dictionary containing the predicted general election vote share and projected seats.
     """
-
-    # # Handle election cycle date logic
-    # election_years = UK_ELECTIONS.keys()
-
-    # if str(election_year) not in election_years:
-    #     raise ValueError(f"{election_year} isn't an election year. Please provide a valid election year.")
-
-    # # Handle selecting the last year election year, prior to specified election year
-    # election_years_ints = [int(year) for year in election_years]
-
-    # # Filter the years to include only those less than or equal to the given election_year
-    # past_election_years = [year for year in election_years_ints if year < election_year]
-
-    # if not past_election_years:
-    #     raise ValueError(f"No elections found before the year {election_year}.")
-
-    # last_election_year = max(past_election_years)
-
-
-    # # Handle data source date start and end range
-    # data_source_range_start = DATA_SOURCES_START_DATE
-    # data_source_range_end = UK_ELECTIONS[str(last_election_year)]["date"]
-
     # Handle data source fetching and cleaning
-    data_sources = ["national_polls_results_combined","constituency_bias", "national_google_trends","ons_economic_data"]
+    data_sources_start_date = DATA_SOURCES_START_DATE
+    data_sources_end_date = DATA_SOURCES_END_DATE
+    data_sources = [
+        "national_polls_results_combined","constituency_bias",
+        "national_google_trends","ons_economic_data"
+    ]
 
-    clean_data_sources = fetch_clean_data(data_sources)
+    # Fetch specified data source classes from data.py
+    data_source_classes = \
+        data_factory(data_sources, data_sources_start_date,
+            data_sources_end_date, GCP_PROJECT_ID,
+            GCP_SERVICE_ACCOUNT_KEY
+        )
+
+    # Fetch actual data via data source classes
+    clean_data_sources = { }
+
+    for data_source_name, data_source_class in data_source_classes.items():
+        data_source_class.get_data_source()
+        data_source_class.clean_data()
+        clean_data_sources[data_source_name] = \
+            data_source_class.fetch_cleaned_data_source()
 
     national_polls_results_combined, constituency_bias, national_google_trends, \
     ons_economic_data = clean_data_sources.values()
@@ -105,10 +101,10 @@ def predict_election() -> dict:
     election_date = datetime.strptime(election_date["date"], "%Y-%m-%d")
 
     #TODO Seperate poll window and days from today until election into seperate vars
-    cutoff_date = election_date - timedelta(days=54)
+    cutoff_date = election_date - timedelta(days=45)
 
     last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
-    prediction_date = election_date - timedelta(days=24)
+    prediction_date = election_date - timedelta(days=15)
 
     # Handle train and test data splitting
     train_data = polls_results_trends_ons[

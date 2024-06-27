@@ -1,3 +1,5 @@
+import pandas as pd
+
 # Calculate the predicted vote share for each party in a given constituency
 def calculate_predicted_vote_share(national_forecast: dict, bias_scores: pd.DataFrame):
     '''
