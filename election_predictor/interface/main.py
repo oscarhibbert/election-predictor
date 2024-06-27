@@ -14,6 +14,7 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
+
 def fetch_data() -> dict:
     """
     Fetches data for specified data sources, should be used in the predict
@@ -47,7 +48,6 @@ def fetch_data() -> dict:
             data_source_class.fetch_cleaned_data_source()
 
     return clean_data_sources
-
 
 def clean_data(data_sources: dict) -> pd.DataFrame:
     """
@@ -108,30 +108,22 @@ def clean_data(data_sources: dict) -> pd.DataFrame:
 
     return polls_results_trends_ons
 
-def preprocess_data():
-    pass
-
-def train_models():
-    pass
-
-def evaluate_models():
-    pass
-
-def predict():
-    pass
-
-def predict_election() -> dict:
+def preprocess_data(cleaned_data: pd.DataFrame) -> dict:
     """
-    Predicts the outcome of the 2024 UK general election.
+    Preprocesses the combined national polls, results, Google trends and ONS
+    data.
 
-    :return: A dictionary containing the predicted general election vote share and projected seats.
+    :param: clean_data_sources: A DataFrame containing the the combined
+    national polls, results, Google trends and ONS data.
+
+    :return: A dictionary containing X and y train and test data in a dictionary
+    ready for model training and evaluation.
     """
-
     # Handle manual scaling for trends columns
     for column in ['LAB_trends', 'CON_trends', 'LIB_trends',
        'GRE_trends', 'BRX_trends', 'PLC_trends', 'SNP_trends', 'UKI_trends',
        'NAT_trends']:
-            polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
+            cleaned_data[column] = cleaned_data[column] / 100
 
     # Handle election cycle date logic
     election_date = UK_ELECTIONS.get("2024")
@@ -140,18 +132,18 @@ def predict_election() -> dict:
     #TODO Seperate poll window and days from today until election into seperate vars
     cutoff_date = election_date - timedelta(days=45)
 
-    last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
+    last_poll_date = cleaned_data["enddate"].iloc[-1]
     prediction_date = election_date - timedelta(days=15)
 
     # Handle train and test data splitting
-    train_data = polls_results_trends_ons[
-        polls_results_trends_ons["startdate"] > "2003-12-31"]
+    train_data = cleaned_data[
+        cleaned_data["startdate"] > "2003-12-31"]
 
     train_data = train_data[train_data["startdate"] < cutoff_date]
 
-    test_data = polls_results_trends_ons[
-        (polls_results_trends_ons[
-            "startdate"] >= cutoff_date) & (polls_results_trends_ons[
+    test_data = cleaned_data[
+        (cleaned_data[
+            "startdate"] >= cutoff_date) & (cleaned_data[
                 "startdate"] <= prediction_date)]
 
     test_data = test_data[test_data["next_elec_date"] == election_date]
@@ -221,7 +213,28 @@ def predict_election() -> dict:
     X_train.drop(columns=['Month_x'], inplace=True)
     X_test.drop(columns=['Month_x'], inplace=True)
 
+    return {
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_train": y_train,
+        "y_test": y_test
+    }
 
+def train_models():
+    pass
+
+def evaluate_models():
+    pass
+
+def predict():
+    pass
+
+def predict_election() -> dict:
+    """
+    Predicts the outcome of the 2024 UK general election.
+
+    :return: A dictionary containing the predicted general election vote share and projected seats.
+    """
     # Handle training and testing UK GE parties vote share
 
     # Handle matrix conversion for train feature data
