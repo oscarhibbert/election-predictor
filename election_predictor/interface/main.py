@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+from colorama import Fore, Style
 
 # Import params
 from election_predictor.params import *
@@ -14,12 +15,17 @@ from election_predictor.ml_logic.preprocessor import preprocessor
 # Import modelling functions from ml_logic
 from election_predictor.ml_logic.model import XGBoostModel
 
-def predict_election() -> dict:
-    """
-    Predicts the outcome of the 2024 UK general election.
 
-    :return: A dictionary containing the predicted general election vote share and projected seats.
+def fetch_data() -> dict:
     """
+    Fetches data for specified data sources, should be used in the predict
+    election function.
+
+    :return: A dictionary containing national polls and results combined,
+    constituency bias, national google trends and ONS economic data.
+    """
+    print(Fore.GREEN + "\nFetching data..." + Style.RESET_ALL)
+
     # Handle data source fetching and cleaning
     data_sources_start_date = DATA_SOURCES_START_DATE
     data_sources_end_date = DATA_SOURCES_END_DATE
@@ -44,8 +50,25 @@ def predict_election() -> dict:
         clean_data_sources[data_source_name] = \
             data_source_class.fetch_cleaned_data_source()
 
-    national_polls_results_combined, constituency_bias, national_google_trends, \
-    ons_economic_data = clean_data_sources.values()
+    print(Fore.GREEN + "\n✅ Data Fetching Complete" + Style.RESET_ALL)
+
+    return clean_data_sources
+
+def clean_data(data_sources: dict) -> pd.DataFrame:
+    """
+    Cleans the fetched data sources. Should be used in the predict election
+    function.
+
+    :param: data_sources: A dictionary containing the data sources from
+    fetch_data.
+
+    :return: A DataFrame combining cleaned polls, results,
+    trends and ONS data – ready for preprocessing.
+    """
+    print(Fore.GREEN + "\nCleaning data..." + Style.RESET_ALL)
+
+    national_polls_results_combined, constituency_bias, \
+    national_google_trends, ons_economic_data = data_sources.values()
 
     # Handle polls and results combined cleaning
     national_polls_results_combined['enddate'] = \
@@ -90,11 +113,28 @@ def predict_election() -> dict:
             right_on='Month'
         )
 
+    print(Fore.GREEN + "\n✅ Data Cleaning Complete" + Style.RESET_ALL)
+
+    return polls_results_trends_ons
+
+def preprocess_data(cleaned_data: pd.DataFrame) -> dict:
+    """
+    Preprocesses the combined national polls, results, Google trends and ONS
+    data.
+
+    :param: clean_data_sources: A DataFrame containing the the combined
+    national polls, results, Google trends and ONS data.
+
+    :return: A dictionary containing X and y train and test data in a dictionary
+    ready for model training and evaluation.
+    """
+    print(Fore.GREEN + "\nPreprocessing data..." + Style.RESET_ALL)
+
     # Handle manual scaling for trends columns
     for column in ['LAB_trends', 'CON_trends', 'LIB_trends',
        'GRE_trends', 'BRX_trends', 'PLC_trends', 'SNP_trends', 'UKI_trends',
        'NAT_trends']:
-            polls_results_trends_ons[column] = polls_results_trends_ons[column] / 100
+            cleaned_data[column] = cleaned_data[column] / 100
 
     # Handle election cycle date logic
     election_date = UK_ELECTIONS.get("2024")
@@ -103,18 +143,18 @@ def predict_election() -> dict:
     #TODO Seperate poll window and days from today until election into seperate vars
     cutoff_date = election_date - timedelta(days=45)
 
-    last_poll_date = polls_results_trends_ons["enddate"].iloc[-1]
+    last_poll_date = cleaned_data["enddate"].iloc[-1]
     prediction_date = election_date - timedelta(days=15)
 
     # Handle train and test data splitting
-    train_data = polls_results_trends_ons[
-        polls_results_trends_ons["startdate"] > "2003-12-31"]
+    train_data = cleaned_data[
+        cleaned_data["startdate"] > "2003-12-31"]
 
     train_data = train_data[train_data["startdate"] < cutoff_date]
 
-    test_data = polls_results_trends_ons[
-        (polls_results_trends_ons[
-            "startdate"] >= cutoff_date) & (polls_results_trends_ons[
+    test_data = cleaned_data[
+        (cleaned_data[
+            "startdate"] >= cutoff_date) & (cleaned_data[
                 "startdate"] <= prediction_date)]
 
     test_data = test_data[test_data["next_elec_date"] == election_date]
@@ -184,8 +224,27 @@ def predict_election() -> dict:
     X_train.drop(columns=['Month_x'], inplace=True)
     X_test.drop(columns=['Month_x'], inplace=True)
 
+    print(Fore.GREEN + "\n✅ Data Preprocessing Complete" + Style.RESET_ALL)
 
-    # Handle training and testing UK GE parties vote share
+    return {
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_train": y_train,
+        "y_test": y_test
+    }
+
+def train_models(X_train: pd.DataFrame, y_train: pd.DataFrame) -> dict:
+    """
+    Trains the specified models on the training data, for each
+    party.
+
+    :param: X_train: The training data features.
+    :param: y_train: The training data targets.
+
+    :return: A dictionary containing the trained models for each
+    party.
+    """
+    print(Fore.GREEN + "\nTraining models..." + Style.RESET_ALL)
 
     # Handle matrix conversion for train feature data
     X_train_matrix = np.array(X_train)
@@ -200,7 +259,7 @@ def predict_election() -> dict:
     for party, party_code in enumerate(parties):
         # Set party target train and test
         party_y_train = y_train[party_code + "_ACT"]
-        party_y_test = y_test[party_code + "_ACT"]
+        # party_y_test = y_test[party_code + "_ACT"]
 
         # Handle XGBoost Regressor modelling
         # Handle model fetch and initialisation
@@ -208,24 +267,48 @@ def predict_election() -> dict:
         xgbr_model = xgb_regressor.initialize_model()
 
         # Handle model compiling
-        xgb_regressor.compile_model(xgbr_model) # Uses default model parameters from params.py
+        # Uses default model parameters from params.py
+        xgb_regressor.compile_model(xgbr_model)
 
         # Handle model training
-        trained_model = xgb_regressor.train_model(xgbr_model, X_train_matrix, party_y_train)
+        trained_model = \
+            xgb_regressor.train_model(xgbr_model, X_train_matrix, party_y_train)
 
         trained_models[party_code] = trained_model
 
-        #TODO Reintroduce model evaluation logic for RMSE
-        # # Handle model evaluation
-        # rmse_score = xgb_regressor.evaluate_model(trained_model, X_test_matrix, party_y_test).mean()
+    print(Fore.GREEN + "\n✅ Model Training Complete" + Style.RESET_ALL)
 
-        # train_test_results[party_code] = {
-        #     "rmse_score": rmse_score,
-        #     "trained_model": trained_model
-        # }
+    return trained_models
+
+#TODO Introduce model evaluation scoring and previous election delta
+# performance evaluation
+def evaluate_models():
+    pass
+    # #  Handle training and testing UK GE parties vote share
+
+    # # TODO Reintroduce model evaluation logic for RMSE
+    # # Handle model evaluation
+    # rmse_score = xgb_regressor.evaluate_model(trained_model, X_test_matrix, party_y_test).mean()
+
+    # train_test_results[party_code] = {
+    #     "rmse_score": rmse_score,
+    #     "trained_model": trained_model
+    # }
+
+def predict(trained_models: dict, X_predict: pd.DataFrame) -> dict:
+    """
+    Predicts the outcome of the 2024 UK general election.
+
+    :param: trained_models: A dictionary containing the trained models for each
+    :param: X_predict: The features to predict on.
+
+    :return: A dictionary containing the predicted general election vote
+    share and projected seats.
+    """
+    print(Fore.GREEN + "\nRunning prediction..." + Style.RESET_ALL)
 
     #Handle prediction (ensure input features are transformed via preprocessor instance)
-    X_predict_matrix = np.array(X_test)
+    X_predict_matrix = np.array(X_predict)
 
     election_predictions = { }
 
@@ -236,6 +319,36 @@ def predict_election() -> dict:
 
         election_predictions[party_code] = predicted_vote_share
 
+    print(Fore.GREEN + "\n✅ Prediction Complete" + Style.RESET_ALL)
+
     return election_predictions
+
+def predict_election() -> dict:
+    """
+    Predicts the outcome of the 2024 UK general election.
+
+    :return: A dictionary containing the predicted general election vote
+    share and projected seats.
+    """
+
+    data_sources = fetch_data()
+
+    cleaned_data = clean_data(data_sources)
+
+    preprocessed_data = preprocess_data(cleaned_data)
+
+    X_train, y_train, X_test, y_test = \
+        preprocessed_data['X_train'], \
+        preprocessed_data['y_train'], \
+        preprocessed_data['X_test'], \
+        preprocessed_data['y_test']
+
+    trained_models = train_models(X_train, y_train)
+
+    prediction = predict(trained_models, X_test)
+
+    print(prediction)
+
+    return prediction
 
 predict_election()
